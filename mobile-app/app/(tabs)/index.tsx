@@ -1,38 +1,42 @@
 import { View, StyleSheet, FlatList, SafeAreaView, Image, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
+import { ProfileView } from '@/components/profiles/Profile';
+import { router } from 'expo-router';
 const logo = require('@/assets/images/dating-app-btc-logo.png');
 
 // Main screen is the profiles
 export default function ProfileScreen() {
   const profiles = [
     {
-        "name": "tdowd",
-        "age": 21,
-        "sex": "heterosexual",
-        "children": 0,
-        "weight": 75,
-        "height": 175,
-        "drugs": false
+      "name": "tdowd",
+      "age": 21,
+      "sex": "heterosexual",
+      "children": 0,
+      "weight": 75,
+      "height": 175,
+      "drugs": false
     },
     {
-        "name": "jdoe",
-        "age": 25,
-        "sex": "homosexual",
-        "children": 2,
-        "weight": 80,
-        "height": 180,
-        "drugs": true
+      "name": "jdoe",
+      "age": 25,
+      "sex": "homosexual",
+      "children": 2,
+      "weight": 80,
+      "height": 180,
+      "drugs": true
     },
     {
-        "name": "jane",
-        "age": 30,
-        "sex": "bisexual",
-        "children": 1,
-        "weight": 65,
-        "height": 160,
-        "drugs": false
+      "name": "jane",
+      "age": 30,
+      "sex": "bisexual",
+      "children": 1,
+      "weight": 65,
+      "height": 160,
+      "drugs": false
     }
-]
+  ];
+  const [selectedProfile, setSelectedProfile] = useState<any>(null);
   
   return (
     <SafeAreaView style={styles.container}>
@@ -41,24 +45,26 @@ export default function ProfileScreen() {
         <ThemedText style={styles.title}>Profiles</ThemedText>
       </View>
       
-      <FlatList
-        data={profiles}
-        renderItem={({ item }) => (
-          <View style={styles.profileItem}>
-            <ThemedText style={styles.profileText}>{item.name}</ThemedText>
-            <ThemedText style={styles.profileText}>Age: {item.age}</ThemedText>
-            <ThemedText style={styles.profileText}>Sex: {item.sex}</ThemedText>
-            <ThemedText style={styles.profileText}>Children: {item.children}</ThemedText>
-            <ThemedText style={styles.profileText}>Weight: {item.weight}kg</ThemedText>
-            <ThemedText style={styles.profileText}>Height: {item.height}cm</ThemedText>
-            <ThemedText style={styles.profileText}>Drugs: {item.drugs ? 'Yes' : 'No'}</ThemedText>
-          </View>
-        )}
-        keyExtractor={(item, index) => index.toString()}
-      />
-      <TouchableOpacity style={styles.addButton} onPress={() => alert('Add profile stub!')}>
-        <ThemedText style={styles.addButtonText}>Add Profile</ThemedText>
-      </TouchableOpacity>
+      {selectedProfile ? (<ProfileView setProfile={setSelectedProfile} profile={selectedProfile} />) :
+        <View>
+          <FlatList
+            data={profiles}
+            renderItem={({ item: profile }) => (
+              <View style={styles.profileItem}>
+                <View>
+                  <TouchableOpacity onPress={() => {setSelectedProfile(profile)}}>
+                    <ThemedText style={styles.profileText}>{profile.name} {profile.age}</ThemedText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+          />
+          <TouchableOpacity style={styles.addButton} onPress={() => router.push('/profiles')}>
+            <ThemedText style={styles.addButtonText}>Add Profile</ThemedText>
+          </TouchableOpacity>
+        </View>
+      }
     </SafeAreaView>
   );
 }
@@ -71,16 +77,18 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: '#5E2BFF',
+    backgroundColor: '#0D1B2A',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    flexDirection: 'row',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
+    marginLeft: 20,
   },
   profileItem: {
     padding: 15,
