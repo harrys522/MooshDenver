@@ -7,7 +7,7 @@ export default function ProfileScreen() {
   const profiles = [
     {
         "name": "tdowd",
-        "age": 21,
+        "dob": new Date(2001, 1, 1),
         "sex": "heterosexual",
         "children": 0,
         "weight": 75,
@@ -16,7 +16,7 @@ export default function ProfileScreen() {
     },
     {
         "name": "jdoe",
-        "age": 25,
+        "dob": new Date(1997, 1, 1),
         "sex": "homosexual",
         "children": 2,
         "weight": 80,
@@ -25,7 +25,7 @@ export default function ProfileScreen() {
     },
     {
         "name": "jane",
-        "age": 30,
+        "dob": new Date(1992, 1, 1),
         "sex": "bisexual",
         "children": 1,
         "weight": 65,
@@ -46,7 +46,7 @@ export default function ProfileScreen() {
         renderItem={({ item }) => (
           <View style={styles.profileItem}>
             <ThemedText style={styles.profileText}>{item.name}</ThemedText>
-            <ThemedText style={styles.profileText}>Age: {item.age}</ThemedText>
+            <ThemedText style={styles.profileText}>Age: {Math.floor((new Date().getTime() - item.dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25))}</ThemedText>
             <ThemedText style={styles.profileText}>Sex: {item.sex}</ThemedText>
             <ThemedText style={styles.profileText}>Children: {item.children}</ThemedText>
             <ThemedText style={styles.profileText}>Weight: {item.weight}kg</ThemedText>
