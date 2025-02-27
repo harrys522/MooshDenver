@@ -1,7 +1,7 @@
 [
     {
         "name": "dowd",
-        "age": 21,
+        "dob": 21,
         "sex": "heterosexual",
         "children": 0,
         "weight": 75,
@@ -10,7 +10,7 @@
     },
     {
         "name": "jdoe",
-        "age": 25,
+        "dob": 25,
         "sex": "homosexual",
         "children": 2,
         "weight": 80,
@@ -19,7 +19,7 @@
     },
     {
         "name": "jane",
-        "age": 30,
+        "dob": 30,
         "sex": "bisexual",
         "children": 1,
         "weight": 65,
