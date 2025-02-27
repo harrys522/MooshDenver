@@ -1,10 +1,23 @@
-export type Profile = {
+type Value = number[];
+
+interface PropertyEntry {
+    type: number; // Index into property types array!
+
+    is: Value; // The value the user has.
+    prefered: Value;
+    notPrefered: Value;
+
+    mustHave: Value;
+    cantHave: Value;
+}
+
+interface PropertyType {
     name: string;
-    age: number;
-    sex: string;
-    children: number;
+
     weight: number;
-    height: number;
-    drugs: boolean;
-    location?: string;
+
+    canSelectMultiple: boolean;
+
+    validFields: string[];
+    validRange: number[];
 }

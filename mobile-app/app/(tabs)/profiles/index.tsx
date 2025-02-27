@@ -58,7 +58,7 @@ export default function ProfileScreen() {
             )}
             keyExtractor={(item, index) => index.toString()}
           />
-          <TouchableOpacity style={styles.addButton} onPress={() => router.push('/new-profile')}>
+          <TouchableOpacity style={styles.addButton} onPress={() => router.push('/profiles/add-profile')}>
             <ThemedText style={styles.addButtonText}>Add Profile</ThemedText>
           </TouchableOpacity>
         </View>
