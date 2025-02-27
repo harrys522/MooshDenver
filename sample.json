@@ -1,0 +1,29 @@
+[
+    {
+        "name": "dowd",
+        "age": 21,
+        "sex": "heterosexual",
+        "children": 0,
+        "weight": 75,
+        "height": 175,
+        "drugs": false
+    },
+    {
+        "name": "jdoe",
+        "age": 25,
+        "sex": "homosexual",
+        "children": 2,
+        "weight": 80,
+        "height": 180,
+        "drugs": false
+    },
+    {
+        "name": "jane",
+        "age": 30,
+        "sex": "bisexual",
+        "children": 1,
+        "weight": 65,
+        "height": 160,
+        "drugs": true
+    }
+]
