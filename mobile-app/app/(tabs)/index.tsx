@@ -51,16 +51,14 @@ export default function ProfileScreen() {
             data={profiles}
             renderItem={({ item: profile }) => (
               <View style={styles.profileItem}>
-                <View>
-                  <TouchableOpacity onPress={() => {setSelectedProfile(profile)}}>
-                    <ThemedText style={styles.profileText}>{profile.name} {profile.age}</ThemedText>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity onPress={() => {setSelectedProfile(profile)}}>
+                  <ThemedText style={styles.profileText}>{profile.name} {profile.age}</ThemedText>
+                </TouchableOpacity>
               </View>
             )}
             keyExtractor={(item, index) => index.toString()}
           />
-          <TouchableOpacity style={styles.addButton} onPress={() => router.push('/profiles')}>
+          <TouchableOpacity style={styles.addButton} onPress={() => router.push('/new-profile')}>
             <ThemedText style={styles.addButtonText}>Add Profile</ThemedText>
           </TouchableOpacity>
         </View>

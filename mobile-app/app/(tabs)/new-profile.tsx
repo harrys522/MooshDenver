@@ -9,7 +9,7 @@ export default function NewProfileScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <ThemedView style={styles.container}>
-                <BackButton navigate={() => router.push('/profiles')} />
+                <BackButton navigate={() => router.push('/')} />
             </ThemedView>
         </SafeAreaView>
     );

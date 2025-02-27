@@ -3,7 +3,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function BackButton(navigate: any) {
     return (
-        <TouchableWithoutFeedback onPress={navigate}>
+        <TouchableWithoutFeedback onPress={() => navigate()}>
             <Icon name="arrow-back-sharp" size={24} />
         </TouchableWithoutFeedback>
     )
