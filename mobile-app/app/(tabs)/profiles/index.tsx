@@ -47,6 +47,7 @@ export default function ProfileScreen() {
       
       {selectedProfile ? (<ProfileView setProfile={setSelectedProfile} profile={selectedProfile} />) :
         <View>
+          {/* TODO: RefreshControl to apply a matchAll function */}
           <FlatList
             data={profiles}
             renderItem={({ item: profile }) => (
@@ -58,7 +59,7 @@ export default function ProfileScreen() {
             )}
             keyExtractor={(item, index) => index.toString()}
           />
-          <TouchableOpacity style={styles.addButton} onPress={() => router.push('/profiles/add-profile')}>
+          <TouchableOpacity style={styles.addButton} onPress={() => router.push('/(tabs)/profiles/add-profile')}>
             <ThemedText style={styles.addButtonText}>Add Profile</ThemedText>
           </TouchableOpacity>
         </View>
