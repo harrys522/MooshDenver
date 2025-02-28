@@ -1,4 +1,4 @@
-# Notes
+# Notes (Schitzophrenic ramblings)
 
 Three parts:
 - Icp canister
@@ -44,20 +44,6 @@ New design:
 
 How does the app work?
 - The app connects to icp via the 
-
-
-# TODO:
-
-- download debtap
-- install ego binaries
-- run ego stuff
-- 
-
-- [ ] install ego tools for local dev
-- [ ] rent a bare metal machine to test sgx
-- [ ] 
-
-
 
 
 

@@ -7,9 +7,13 @@ import (
 	// "github.com/edgelesssys/ego/enclave"
 	"crypto/ed25519"
 	"crypto/rand"
+	"encoding/json"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/linkedin/goavro/v2"
+	"github.com/vmihailenco/msgpack/v5"
+	"go.mongodb.org/mongo-driver/bson"
 
 	"crypto/sha256"
 	"fmt"
@@ -153,25 +157,17 @@ func compare(pl, pr Profile) int {
 }
 
 func processProfiles(profiles []Profile) []Match {
-	// Do we distinguish profiles?
-
-	// 1. Perform basic processing! Exclude profiles that have the same exclusion list from one another.
-
-	// 2. Run tournament.
-
-	// XXX: Do basic optimization
-	// Check every profile against every other profile.
 	matches := []Match{}
 
-	for _, p1 := range profiles {
+	for i, p1 := range profiles[:len(profiles)-1] {
 
 		topScores := [5]struct {
 			score   int
 			profile Profile
+			found   bool
 		}{}
 
-		// TODO: Make sure skipping profiles like this makes sense
-		for _, p2 := range profiles {
+		for _, p2 := range profiles[i+1:] {
 			// TODO: Apply distance filter.
 			// TODO: Apply exclusion list.
 			// TODO: Apply inclusion list.
@@ -185,6 +181,7 @@ func processProfiles(profiles []Profile) []Match {
 
 				for i := range topScores {
 					if topScores[i].score < score {
+						topScores[i].found = true
 						topScores[i].score = score
 						topScores[i].profile = p2
 						break
@@ -194,26 +191,27 @@ func processProfiles(profiles []Profile) []Match {
 		}
 
 		for _, m := range topScores {
-			p2 := m.profile
-			matches = append(matches, Match{
-				[]PublicProfile{
-					{
-						p1.FirstName,
-						p1.LastName[:1],
-						p1.ContactEmail,
+			if m.found {
+				p2 := m.profile
+				matches = append(matches, Match{
+					[]PublicProfile{
+						{
+							p1.FirstName,
+							p1.LastName[:1],
+							p1.ContactEmail,
+						},
+						{
+							p2.FirstName,
+							p2.LastName[:1],
+							p2.ContactEmail,
+						},
 					},
-					{
-						p2.FirstName,
-						p2.LastName[:1],
-						p2.ContactEmail,
-					},
-				},
-				m.score,
-			})
+					m.score,
+				})
+			}
 		}
 	}
 
-	// 3. Output the matches
 	return matches
 }
 
@@ -323,7 +321,15 @@ func main() {
 		fmt.Println(m)
 	}
 
-	return
+	bytes, _ := json.Marshal(profiles)
+	fmt.Println("Naive encoding bytes:", len(bytes))
+
+	// bytes, _ = msgpack.Marshal(profiles)
+	// fmt.Println("Message pack encoding bytes:", len(bytes))
+	//
+	// bytes, _ = bson.Marshal(profiles)
+	//
+	// return
 
 	pk, sk := getKeyPair()
 
@@ -338,14 +344,29 @@ func main() {
 	}
 
 	r.GET("/attestation", func(c *gin.Context) {
-		// TODO: Return proof of attestation
+		// TODO: Return copy of attestation
 	})
 
 	r.GET("/matchmake", func(c *gin.Context) {
 		// Take arrays of profiles as input.
 		// Spits out
 
+		// 1. Decrypt the profile arrays.
+
 		// processProfiles()
+
+		// c.JSON(profiles)
+	})
+
+	r.GET("/matchmake-debug", func(c *gin.Context) {
+		var profiles []Profile
+
+		if c.ShouldBindJSON(&profiles) {
+		}
+
+		processProfiles()
+
+		// c.JSON(profiles)
 	})
 
 	r.Run()
