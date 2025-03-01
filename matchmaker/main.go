@@ -11,9 +11,6 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/linkedin/goavro/v2"
-	"github.com/vmihailenco/msgpack/v5"
-	"go.mongodb.org/mongo-driver/bson"
 
 	"crypto/sha256"
 	"fmt"
@@ -351,27 +348,33 @@ func main() {
 		// TODO: Return copy of attestation
 	})
 
+	r.GET("/properties", func(c *gin.Context) {
+		c.JSON(200, PropertyTypes)
+	})
+
 	r.GET("/matchmake", func(c *gin.Context) {
 		// Take arrays of profiles as input.
 		// Spits out
 
 		// 1. Decrypt the profile arrays.
+		var profiles []Profile
+		c.ShouldBindJSON(&profiles)
 
 		// processProfiles()
 
 		// c.JSON(profiles)
 	})
 
-	r.GET("/matchmake-debug", func(c *gin.Context) {
-		var profiles []Profile
-
-		if c.ShouldBindJSON(&profiles) {
-		}
-
-		processProfiles()
-
-		// c.JSON(profiles)
-	})
+	// r.GET("/matchmake-debug", func(c *gin.Context) {
+	// 	var profiles []Profile
+	//
+	// 	// if c.ShouldBindJSON(&profiles) {
+	// 	// }
+	//
+	// 	processProfiles()
+	//
+	// 	// c.JSON(profiles)
+	// })
 
 	r.Run()
 
