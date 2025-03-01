@@ -14,17 +14,17 @@ export default function NewProfileScreen({ profile, setProfile }: NewProfileScre
         const updatedIs = Array.isArray(newValue) ? newValue : [newValue];
 
         const updatedEntry: PropertyEntry = {
-        type: typeIndex,
-        is: updatedIs,
-        prefered: existingEntry?.prefered || [],
-        notPrefered: existingEntry?.notPrefered || [],
-        mustHave: existingEntry?.mustHave || [],
-        cantHave: existingEntry?.cantHave || [],
+            type: typeIndex,
+            is: updatedIs,
+            prefered: existingEntry?.prefered || [],
+            notPrefered: existingEntry?.notPrefered || [],
+            mustHave: existingEntry?.mustHave || [],
+            cantHave: existingEntry?.cantHave || [],
         };
 
         const updatedProperties = profile.properties.some((prop) => prop.type === typeIndex)
-        ? profile.properties.map((prop) => (prop.type === typeIndex ? updatedEntry : prop))
-        : [...profile.properties, updatedEntry];
+            ? profile.properties.map((prop) => (prop.type === typeIndex ? updatedEntry : prop))
+            : [...profile.properties, updatedEntry];
 
         setProfile({ ...profile, properties: updatedProperties, lastModified: new Date() });
     };
@@ -40,7 +40,7 @@ export default function NewProfileScreen({ profile, setProfile }: NewProfileScre
             return (
                 <DateSelector
                     label={item.name}
-                    selectedDate={(profileProperty?.is[0] ?? Date.now() / 1000) * 1000}
+                    selectedDate={profileProperty?.is[0] ?? new Date().setFullYear(1990, 0, 1)}
                     onDateChange={(value) => handleValueChange(index, value)}
                 />
             );
