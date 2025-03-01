@@ -376,7 +376,7 @@ func main() {
 	// 	// c.JSON(profiles)
 	// })
 
-	r.Run()
+	r.Run(":3000")
 
 	// key, _, err := enclave.GetProductSealKey()
 	//
