@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import { MultiSelector } from "./Selectors";
+import { View, TextInput, FlatList, TouchableOpacity, StyleSheet, ScrollView, Button } from "react-native";
 import { PropertyEntry, propertyTypes } from "@/types";
 import { ThemedText } from "../ThemedText";
 
@@ -8,12 +7,12 @@ interface PreferenceSelectorProps {
     preferenceType: "prefered" | "notPrefered" | "mustHave" | "cantHave";
     properties: PropertyEntry[];
     setProperties: (properties: PropertyEntry[]) => void;
+    onClose: () => void;
 }
 
-export default function PreferenceSelector({ preferenceType, properties, setProperties }: PreferenceSelectorProps) {
+export default function PreferenceSelector({ preferenceType, properties, setProperties, onClose }: PreferenceSelectorProps) {
     const [searchQuery, setSearchQuery] = useState("");
 
-    // Retrieve all valid fields from property types
     const allValidFields = propertyTypes.flatMap((property, typeIndex) =>
         property.validFields?.map((field) => ({ field, typeIndex })) ?? []
     );
@@ -25,29 +24,25 @@ export default function PreferenceSelector({ preferenceType, properties, setProp
     const handleValueChange = (selectedValues: string[]) => {
         let updatedProperties = [...properties];
 
-        // Convert selected string values into their respective indexes
-        const selectedIndexes = selectedValues
-            .map((value) => {
-                const match = allValidFields.find((item) => item.field === value);
-                return match ? { typeIndex: match.typeIndex, valueIndex: propertyTypes[match.typeIndex].validFields?.indexOf(value) } : null;
-            })
-            .filter((item) => item !== null) as { typeIndex: number; valueIndex: number }[];
+        selectedValues.forEach((value) => {
+            const match = allValidFields.find((item) => item.field === value);
+            if (!match) return;
 
-        selectedIndexes.forEach(({ typeIndex, valueIndex }) => {
+            const { typeIndex } = match;
+            const valueIndex = propertyTypes[typeIndex].validFields?.indexOf(value);
+            if (valueIndex === undefined || valueIndex === -1) return;
+
             let propertyEntry = updatedProperties.find((prop) => prop.type === typeIndex);
-
             if (!propertyEntry) {
                 propertyEntry = { type: typeIndex, is: [], prefered: [], notPrefered: [], mustHave: [], cantHave: [] };
                 updatedProperties.push(propertyEntry);
             }
 
-            // Get currently selected indexes for this preference type
             const currentSelection = new Set(propertyEntry[preferenceType]);
-
-            if (selectedValues.includes(propertyTypes[typeIndex].validFields![valueIndex])) {
-                currentSelection.add(valueIndex);
-            } else {
+            if (currentSelection.has(valueIndex)) {
                 currentSelection.delete(valueIndex);
+            } else {
+                currentSelection.add(valueIndex);
             }
 
             propertyEntry[preferenceType] = Array.from(currentSelection);
@@ -56,89 +51,45 @@ export default function PreferenceSelector({ preferenceType, properties, setProp
         setProperties(updatedProperties);
     };
 
-    const handleRemove = (value: string) => {
-        let updatedProperties = [...properties];
-
-        // Convert value to its index and typeIndex
-        const match = allValidFields.find((item) => item.field === value);
-        if (!match) return;
-
-        const { typeIndex } = match;
-        const valueIndex = propertyTypes[typeIndex].validFields?.indexOf(value);
-        if (valueIndex === undefined || valueIndex === -1) return;
-
-        let propertyEntry = updatedProperties.find((prop) => prop.type === typeIndex);
-        if (!propertyEntry) return;
-
-        // Remove the specific value from the selected preference type
-        propertyEntry[preferenceType] = propertyEntry[preferenceType].filter((index) => index !== valueIndex);
-
-        // Remove entry entirely if it has no values left
-        if (
-            propertyEntry.prefered.length === 0 &&
-            propertyEntry.notPrefered.length === 0 &&
-            propertyEntry.mustHave.length === 0 &&
-            propertyEntry.cantHave.length === 0
-        ) {
-            updatedProperties = updatedProperties.filter((prop) => prop.type !== typeIndex);
-        }
-
-        setProperties(updatedProperties);
-    };
-
     return (
         <View style={styles.container}>
-            <ThemedText style={styles.label}>{preferenceType.toUpperCase()}</ThemedText>
+            {/* Selected Preferences */}
+            <ScrollView horizontal style={styles.selectedContainer}>
+                {properties
+                    .flatMap((prop) =>
+                        Array.isArray(prop[preferenceType])
+                            ? (prop[preferenceType] as number[])
+                                .map((index) => propertyTypes[prop.type].validFields?.[index] ?? "")
+                            : []
+                    )
+                    .map((val, index) => (
+                        <TouchableOpacity key={index} style={styles.selectedItem} onPress={() => handleValueChange([val])}>
+                            <ThemedText style={styles.selectedItemText}>{val} ✕</ThemedText>
+                        </TouchableOpacity>
+                    ))}
+            </ScrollView>
 
+            {/* Search Bar */}
             <TextInput
                 style={styles.searchInput}
                 placeholder={`Search ${preferenceType} preferences...`}
-                placeholderTextColor="#666"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
             />
 
-            {/* FlatList ensures smooth scrolling */}
+            {/* Search Results */}
             <FlatList
                 data={filteredFields}
                 keyExtractor={(item) => item.field}
                 renderItem={({ item }) => (
-                    <TouchableOpacity
-                        onPress={() => handleValueChange([item.field])}
-                        style={styles.listItem}
-                    >
-                        <ThemedText style={styles.listItemText}>{item.field}</ThemedText>
+                    <TouchableOpacity onPress={() => handleValueChange([item.field])} style={styles.listItem}>
+                        <ThemedText>{item.field}</ThemedText>
                     </TouchableOpacity>
                 )}
-                contentContainerStyle={styles.listContainer}
                 keyboardShouldPersistTaps="handled"
             />
 
-            {/* Ensures all selected options are clearly visible */}
-            <MultiSelector
-                label={`Selected ${preferenceType}`}
-                options={allValidFields.map(({ field }) => field)}
-                selectedValues={properties
-                    .flatMap((prop) =>
-                        prop[preferenceType].map((index) => propertyTypes[prop.type].validFields?.[index] ?? "")
-                    )
-                    .filter((val) => val !== "")}
-                onSelectedItemsChange={(values) => {
-                    // Preserve existing selections while only removing deselected ones
-                    const currentSelection = properties.flatMap((prop) =>
-                        prop[preferenceType].map((index) => propertyTypes[prop.type].validFields?.[index] ?? "")
-                    );
-
-                    // Find which value was removed
-                    const removedValues = currentSelection.filter((val) => !values.includes(val));
-
-                    if (removedValues.length > 0) {
-                        removedValues.forEach((value) => handleRemove(value));
-                    } else {
-                        handleValueChange(values);
-                    }
-                }}
-            />
+            <Button title="Done" onPress={onClose} />
         </View>
     );
 }
@@ -154,7 +105,24 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
-        elevation: 2, // Android shadow effect
+        elevation: 2,
+    },
+    selectedContainer: {
+        flexDirection: "row",
+        marginBottom: 10,
+        paddingVertical: 5,
+    },
+    selectedItem: {
+        backgroundColor: "#007AFF",
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 16,
+        marginRight: 8,
+    },
+    selectedItemText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "500",
     },
     searchInput: {
         padding: 12,
@@ -166,22 +134,21 @@ const styles = StyleSheet.create({
         borderColor: "#ccc",
     },
     listContainer: {
-        maxHeight: 200, // Ensures list doesn't get clipped
+        maxHeight: 200,
     },
     listItem: {
-        padding: 15,
-        backgroundColor: "#fff",
+        padding: 12,
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
+        backgroundColor: "#fff",
     },
     listItemText: {
         fontSize: 16,
-        color: "#333", // Darker text for better readability
+        color: "#333",
     },
-    label: {
-        fontSize: 18,
-        fontWeight: "600",
-        marginBottom: 10,
-        textAlign: "center",
+    buttonContainer: {
+        marginTop: 10,
+        alignSelf: "center",
+        width: "100%",
     },
 });
