@@ -44,8 +44,8 @@ export default function PreferenceSelectionScreen({
                                 .flatMap((prop) =>
                                     Array.isArray(prop[item as keyof PropertyEntry])
                                         ? (prop[item as keyof PropertyEntry] as number[]).map(
-                                              (index) => propertyTypes[prop.type].validFields?.[index] ?? ""
-                                          )
+                                                (index) => propertyTypes[prop.type].validFields?.[index] ?? ""
+                                            )
                                         : []
                                 )
                                 .filter((val) => val !== "")
