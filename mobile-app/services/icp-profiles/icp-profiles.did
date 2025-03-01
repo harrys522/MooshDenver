@@ -1,21 +1,39 @@
 type Profile = text;
+type FriendInvite = text;
+type Friend = 
+ record {
+   desc: text;
+   id: principal;
+   name: text;
+   pfp: text;
+ };
 service : {
-  addFriend: (principal) -> () oneway;
-  addFriendDELETELATER: (principal, principal) -> () oneway;
-  addProfile: (principal, Profile) -> () oneway;
-  getAllProfilesBasic: (principal) -> (vec record {
-                                             principal;
-                                             Profile;
-                                           });
-  getAllProfilesWithDepth: (principal, int8) ->
-   (vec record {
-          principal;
-          Profile;
-        });
-  getFriends: (principal) -> (vec principal);
+  _addFriend: (principal, principal) -> () oneway;
+  _addFriendInvite: (principal, text, text, text, principal, FriendInvite) ->
+   (text);
+  _addMutualFriends: (principal, principal) -> () oneway;
+  _addProfile: (principal, Profile) -> () oneway;
+  _generateInviteCode: () -> (text);
+  _getFriends: (principal) -> (vec principal);
+  _getProfile: (principal) -> (opt Profile);
+  _removeFriend: (principal, principal) -> () oneway;
+  _removeProfile: (principal) -> () oneway;
+  addFriend: (text, text, text, principal, FriendInvite) -> (text);
+  addProfile: (Profile) -> () oneway;
+  getAllProfilesBasic: () -> (vec record {
+                                    principal;
+                                    Profile;
+                                  });
+  getAllProfilesWithDepth: (int8) -> (vec record {
+                                            principal;
+                                            Profile;
+                                          });
+  getFriends: () -> (vec principal);
   getId: () -> (text);
-  getProfile: (principal) -> (opt Profile);
-  greet: (Profile) -> (text) query;
+  getInvite: () -> (FriendInvite);
+  getLatestFriend: () -> (opt Friend);
+  getProfile: () -> (opt Profile);
+  greet: (Profile) -> (text);
   removeFriend: (principal) -> () oneway;
-  removeProfile: (principal) -> () oneway;
+  removeProfile: () -> () oneway;
 }

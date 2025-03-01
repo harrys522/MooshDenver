@@ -11,7 +11,18 @@ export interface Friend {
 export type FriendInvite = string;
 export type Profile = string;
 export interface _SERVICE {
+  '_addFriend' : ActorMethod<[Principal, Principal], undefined>,
+  '_addFriendInvite' : ActorMethod<
+    [Principal, string, string, string, Principal, FriendInvite],
+    string
+  >,
+  '_addMutualFriends' : ActorMethod<[Principal, Principal], undefined>,
+  '_addProfile' : ActorMethod<[Principal, Profile], undefined>,
   '_generateInviteCode' : ActorMethod<[], string>,
+  '_getFriends' : ActorMethod<[Principal], Array<Principal>>,
+  '_getProfile' : ActorMethod<[Principal], [] | [Profile]>,
+  '_removeFriend' : ActorMethod<[Principal, Principal], undefined>,
+  '_removeProfile' : ActorMethod<[Principal], undefined>,
   'addFriend' : ActorMethod<
     [string, string, string, Principal, FriendInvite],
     string

@@ -1,19 +1,19 @@
 import { Tabs, router } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, ScrollView } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { IcpProvider } from '@/components/IcpProvider';
+import { EverythingProvider } from '@/components/EverythingProvider';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <IcpProvider>
+    <EverythingProvider>
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
@@ -28,12 +28,14 @@ export default function TabLayout() {
             },
             default: {},
           }),
-        }}>
+        }}
+      >
+
         <Tabs.Screen
-          name="profiles"
+          name="profiles/index"
           options={{
             title: 'Profiles',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="heart.fill" color={color} />,
           }}
         />
         <Tabs.Screen
@@ -44,6 +46,6 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-    </IcpProvider>
+    </EverythingProvider>
   );
 }

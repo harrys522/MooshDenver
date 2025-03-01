@@ -2,16 +2,16 @@ import { StyleSheet, View, ScrollView } from 'react-native';
 import { Profile, propertyTypes, getSelectedValues } from '@/types';
 import { ThemedText } from '../ThemedText';
 import BackButton from '../BackButton';
+import { router } from 'expo-router';
 
 interface ProfileItemProps {
-    setProfile: (profile: any) => void;
     profile: Profile;
 }
 
-export function ProfileView({ setProfile, profile }: ProfileItemProps) {
+export function ProfileView({ profile }: ProfileItemProps) {
     return (
         <ScrollView style={styles.container}>
-            <BackButton navigate={() => setProfile(null)} />
+            <BackButton navigate={() => router.back()} />
             <View style={styles.profileContainer}>
                 <ProfileDetail label="First Name" value={profile.firstName} />
                 <ProfileDetail label="Last Name" value={profile.lastName} />
@@ -19,7 +19,7 @@ export function ProfileView({ setProfile, profile }: ProfileItemProps) {
                 <ProfileDetail label="Location" value={profile.geolocation} />
                 <ProfileDetail label="Max Distance" value={`${profile.maxDistance} km`} />
                 <ProfileDetail label="Last Modified" value={new Date(profile.lastModified).toDateString()} />
-                
+
                 {profile.properties.map((property, index) => {
                     const propertyType = propertyTypes[property.type];
 

@@ -8,7 +8,30 @@ export const idlFactory = ({ IDL }) => {
     'name' : IDL.Text,
   });
   return IDL.Service({
+    '_addFriend' : IDL.Func([IDL.Principal, IDL.Principal], [], ['oneway']),
+    '_addFriendInvite' : IDL.Func(
+        [
+          IDL.Principal,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Principal,
+          FriendInvite,
+        ],
+        [IDL.Text],
+        [],
+      ),
+    '_addMutualFriends' : IDL.Func(
+        [IDL.Principal, IDL.Principal],
+        [],
+        ['oneway'],
+      ),
+    '_addProfile' : IDL.Func([IDL.Principal, Profile], [], ['oneway']),
     '_generateInviteCode' : IDL.Func([], [IDL.Text], []),
+    '_getFriends' : IDL.Func([IDL.Principal], [IDL.Vec(IDL.Principal)], []),
+    '_getProfile' : IDL.Func([IDL.Principal], [IDL.Opt(Profile)], []),
+    '_removeFriend' : IDL.Func([IDL.Principal, IDL.Principal], [], ['oneway']),
+    '_removeProfile' : IDL.Func([IDL.Principal], [], ['oneway']),
     'addFriend' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Principal, FriendInvite],
         [IDL.Text],

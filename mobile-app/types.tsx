@@ -1,5 +1,14 @@
 type Value = number[];
 
+export interface ProfileWingman {
+    id: string;
+    name: string;
+    desc: string;
+
+    // Stored as base64
+    pfp: string;
+}
+
 export interface PropertyEntry {
     type: number; // Index into property types array!
 
@@ -32,7 +41,7 @@ export interface Profile {
 
     properties: PropertyEntry[];
 
-    exclusionList: Array<[32]>;
+    exclusionList: string[];
     lastModified: Date;
 }
 
@@ -54,7 +63,7 @@ export function getProperty(
     profile: Profile,
     propertyName: string,
     propertyTypes: PropertyType[]
-    ): PropertyEntry | undefined {
+): PropertyEntry | undefined {
     // Find the index in the propertyTypes array based on the property name.
     const typeIndex = propertyTypes.findIndex((pt) => pt.name === propertyName);
     if (typeIndex === -1) {
@@ -69,7 +78,7 @@ export function setProperty(
     profile: Profile,
     typeIndex: number,
     propertyEntry: PropertyEntry
-    ): void {
+): void {
     // Check if there is already an entry for this property type.
     const index = profile.properties.findIndex((prop) => prop.type === typeIndex);
     if (index !== -1) {

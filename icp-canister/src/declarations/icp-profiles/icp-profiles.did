@@ -8,7 +8,16 @@ type Friend =
    pfp: text;
  };
 service : {
+  _addFriend: (principal, principal) -> () oneway;
+  _addFriendInvite: (principal, text, text, text, principal, FriendInvite) ->
+   (text);
+  _addMutualFriends: (principal, principal) -> () oneway;
+  _addProfile: (principal, Profile) -> () oneway;
   _generateInviteCode: () -> (text);
+  _getFriends: (principal) -> (vec principal);
+  _getProfile: (principal) -> (opt Profile);
+  _removeFriend: (principal, principal) -> () oneway;
+  _removeProfile: (principal) -> () oneway;
   addFriend: (text, text, text, principal, FriendInvite) -> (text);
   addProfile: (Profile) -> () oneway;
   getAllProfilesBasic: () -> (vec record {

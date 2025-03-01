@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { View, Button, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import BasicProfileScreen from "./BasicProfile";
 import NewProfileScreen from "./AddProfile";
 import PreferenceSelectionScreen from "./Preferences";
 import ProfileReviewScreen from "./ProfileReview";
 import { Profile } from "@/types";
+
+import { Button } from "../Button";
 
 export default function ProfileSetupCarousel() {
     const [step, setStep] = useState(1);

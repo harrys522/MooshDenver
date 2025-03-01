@@ -107,9 +107,13 @@ actor {
     // If the code matches the person's current code, then we're on!
     let f = friendInvites.get(friend);
     switch (f) {
-      case (null) {};
+      case (null) {
+        Debug.print("Friend not valid");
+      };
       case (?f) {
+        Debug.print("Friend is valid");
         if (code == f.0) {
+          Debug.print("Code is valid");
           _addFriend(user, friend);
           _addFriend(friend, user);
 
@@ -145,13 +149,15 @@ actor {
     _removeFriend(friend, user);
   };
 
-  public shared(msg) func getInvite(): async FriendInvite {
-    let res = friendInvites.get(msg.caller);
+  public func _getInvite(user: Principal): async FriendInvite {
+    let res = friendInvites.get(user);
+    Debug.print("Get invite principal: " # Principal.toText(user));
 
     switch (res) {
       case (null) { 
         let code = await _generateInviteCode();
-        friendInvites.put(msg.caller, (code, null));
+        Debug.print("Adding this person to friendInvites: " # Principal.toText(user));
+        friendInvites.put(user, (code, null));
 
         return code;
       };
@@ -159,13 +165,20 @@ actor {
     };
   };
 
-  public shared(msg) func getLatestFriend(): async ?Friend {
-    let res = friendInvites.get(msg.caller);
+  public shared(msg) func getInvite(): async FriendInvite {
+    return await _getInvite(msg.caller);
+  };
+
+  public func _getLatestFriend(user: Principal): async ?Friend {
+    let res = friendInvites.get(user);
 
     switch (res) {
       case (null) { return null };
       case (?res) { return res.1 };
     };
+  };
+  public shared(msg) func getLatestFriend(): async ?Friend {
+    return await _getLatestFriend(msg.caller);
   };
 
   func safeToArray<K, V>(map : ?HashMap.HashMap<K, V>) : [K] {
