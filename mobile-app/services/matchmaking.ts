@@ -1,13 +1,45 @@
 import { Profile } from "@/types";
 import forge from "node-forge";
-import { icp_profiles } from "./icp-profiles"
 
+const backendUrl =  process.env.EXPO_PUBLIC_MATCH_URL || 'https://denver.moosh.gg'
 
 var rsa = forge.pki.rsa;
 // Pregenerated testing keypair
-const n = new forge.jsbn.BigInteger("18036861277620816391897525796053798322654959645852558212187634609687151664374502975936177700603729212751728046566935251857430075890303147890803432834569854432904235128165310149007919395372610577704429938768074221655990424833579901205407828895702305705065286315734737178147842358165229686813150561038320883750989590514294609897445275059675790810486146098459183376283976363803877341257325924274972841950762501669933314127902954711815020230411006388193458124985410395294897051077389059616148677180086598747094542266878697001834285798162791677206671273904388208702765620854218394815604441992434230723383443611634108801467")
+const n = new forge.jsbn.BigInteger("23279870195056103910301780594235990532180830393447504809213711769375892073556364957986734788883200340509468659757229938170247881687642110925615296330208156584934956621918894434440231864257976953857544809972618710566595947530792201198091579895943463947294142724083948559972678369327663184307748369627261523560203665339243119718989869365036201251318855250204181927693120931881145711400599912223692881008976927993376066402684967395567956948513741529381599425511191922416839709853826704831503454517434400059929645759724390643400970980863944212385982881527657006219101756337849157495092080818745786730913877709224058491203")
 const e = new forge.jsbn.BigInteger("65537")
 export const samplePublicKey = rsa.setPublicKey(n, e)
+
+export async function getPublicKey() {
+    try {
+        const response = await fetch(`${backendUrl}/`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch public key');
+        }
+
+        const res = await response.json() as { publicKey: string };
+
+        // Decode Base64-encoded PEM
+        const pemString = forge.util.decode64(res.publicKey);
+
+        // Convert PEM to a Forge public key
+        const publicKey = forge.pki.publicKeyFromPem(pemString);
+
+        return publicKey;
+    } catch (error) {
+        console.error('Error fetching public key:', error);
+        throw error;
+    }
+}
+
+interface ConfidentialProfileSet {
+    encryptedSymKey: string
+    iv: string
+    ciphertext: string
+}
 
 
 export function encryptProfiles(publicKey: forge.pki.rsa.PublicKey, profiles: Profile[]) {
@@ -17,17 +49,32 @@ export function encryptProfiles(publicKey: forge.pki.rsa.PublicKey, profiles: Pr
     const { ciphertext, symKey, iv } = encryptMessage(encodedB64)
     const encryptedSymKey = publicKey.encrypt(symKey) // RSAES-PKCS1-V1_5 encrypt the symmetric key
 
-    const confidentialProfileSet = JSON.stringify({
-        encryptedSymKey,
-        iv,
-        ciphertext
-    })
+    const confidentialProfileSet: ConfidentialProfileSet = {
+        encryptedSymKey: forge.util.encode64(encryptedSymKey),
+        iv: forge.util.encode64(iv),
+        ciphertext: forge.util.encode64(ciphertext)
+    }
     // console.log(testDecryptMessage(message, ciphertext, symKey, iv))
+    const stringified = JSON.stringify(confidentialProfileSet)
+    console.log(stringified)
     return confidentialProfileSet
 }
 
-export function sendMatchmakingProfiles(encryptedProfileSets: string[]) {
+export async function sendMatchmakingProfiles(encryptedProfileSets: ConfidentialProfileSet[]) {
     // encryptedProfileSets each item in array decrypts to Profile[], meaning this data is Profile[][] after decryption
+    console.log(backendUrl)
+    const res = await fetch(`${backendUrl}/matchmaking`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(encryptedProfileSets)
+    })
+    if (!res.ok) {
+        throw new Error('Matchmaking response was not ok')
+    }
+    const data = await res.json()
+    return data
 }
 
 function encryptMessage(message: string) {
@@ -39,7 +86,7 @@ function encryptMessage(message: string) {
     cipher.update(forge.util.createBuffer(message));
     cipher.finish();
 
-    var ciphertext = cipher.output;
+    var ciphertext = cipher.output.data;
     return { ciphertext, symKey, iv }
 }
 
