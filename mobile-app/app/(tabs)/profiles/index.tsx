@@ -1,4 +1,4 @@
-import { View, StyleSheet, FlatList, Image, TouchableOpacity, Text, RefreshControl, Platform } from 'react-native';
+import { View, StyleSheet, FlatList, ImageBackground, TouchableOpacity, Text, RefreshControl, Platform , Image} from 'react-native';
 import { useState } from 'react';
 import { useContext } from 'react';
 import { ThemedText } from '@/components/ThemedText';
@@ -20,7 +20,8 @@ import { Button } from '@/components/Button';
 import { BaseView } from '@/components/BaseView';
 import { getProperty, Match, MatchWith, Profile, propertyTypes, PublicProfile } from '@/types';
 
-const logo = require('@/assets/images/Cloud_white.png');
+const logo = require('@/assets/images/Wingman.png');
+const backgroundImage = require('@/assets/images/Wallpaper_Gray.png');
 
 export default function ProfileScreen() {
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
@@ -79,106 +80,83 @@ export default function ProfileScreen() {
   }
 
   return (
-    <BaseView
-      refreshControl={
-        <RefreshControl
-          refreshing={fetchingMatches}
-          onRefresh={fetchMatches}
-        />
-
-      }
+    <ImageBackground
+      source={backgroundImage}
+      style={styles.background}
     >
-      <View>
-        {/* TODO: RefreshControl to apply a matchAll function */}
+      <BaseView
+        refreshControl={
+          <RefreshControl
+            refreshing={fetchingMatches}
+            onRefresh={fetchMatches}
+          />
+        }
+      >
+        <View>
+          {/* TODO: RefreshControl to apply a matchAll function */}
 
-        <Button title="Add profile 💘" onPress={() => { router.push('/add-profiles') }} />
+          <Button title="Add profile 💘" onPress={() => { router.push('/add-profiles') }} />
 
-        <FlatList
-          data={profiles}
-          renderItem={({ item: profile }) => {
-            const matches = getMatchesForProfile(profile);
-            const n = matches.length;
+          <FlatList
+            data={profiles}
+            renderItem={({ item: profile }) => {
+              const matches = getMatchesForProfile(profile);
+              const n = matches.length;
 
-            return (
-              <View style={styles.profileItem}>
-                <TouchableOpacity onPress={() => {
-                  router.push({
-                    pathname: '/view-profile',
-                    params: {
-                      profile: encodeURIComponent(JSON.stringify(profile)),
-                      matches: encodeURIComponent(JSON.stringify(getMatchesForProfile(profile)))
-                    }
-                  })
-                }}>
-                  <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <View>
-                      <ThemedText style={{ fontSize: 18, fontWeight: 'bold' }}>
-                        {profile.firstName} {profile.lastName}
-                      </ThemedText>
+              return (
+                <View style={styles.profileItem}>
+                  <TouchableOpacity onPress={() => {
+                    router.push({
+                      pathname: '/view-profile',
+                      params: {
+                        profile: encodeURIComponent(JSON.stringify(profile)),
+                        matches: encodeURIComponent(JSON.stringify(getMatchesForProfile(profile)))
+                      }
+                    })
+                  }}>
+                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <View>
+                        <ThemedText style={{ fontSize: 18, fontWeight: 'bold' }}>
+                          {profile.firstName} {profile.lastName}
+                        </ThemedText>
 
-                      <Text> {
-                        (new Date()).getFullYear() - (new Date(getProperty(profile, "Birthday", propertyTypes)?.is[0] * 1000) ?? new Date()).getFullYear()
-                      } y/o </Text>
-                      <Text> Likes: {} </Text>
+                        <Text> {
+                          (new Date()).getFullYear() - (new Date(getProperty(profile, "Birthday", propertyTypes)?.is[0] * 1000) ?? new Date()).getFullYear()
+                        } y/o </Text>
+                        <Text> Likes: {} </Text>
+                      </View>
+
+                      <Text style={{ fontWeight: '900', fontSize: 20 }}>
+                        {
+                          matches.length
+                        }
+                        {
+                          (n == 0 ? '💔' : '') +
+                          (n == 1 ? '❤️' : '') +
+                          (n == 2 ? '❤️' : '') +
+                          (n >= 3 ? '💕' : '')
+                        }
+                      </Text>
                     </View>
+                  </TouchableOpacity>
+                </View>
+              )
+            }}
+            keyExtractor={(item, index) => index.toString()}
+          />
+          <Image source={logo} style={styles.logo} />
+          <Button title="(Load dummy profiles)" onPress={() => { setProfiles(dummyProfiles) }} />
+          <Button title="(Delete all profiles)" onPress={() => { setProfiles([]) }} />
 
-                    <Text style={{ fontWeight: '900', fontSize: 20 }}>
-                      {
-                        matches.length
-                      }
-                      {
-                        (n == 0 ? '💔' : '') +
-                        (n == 1 ? '❤️' : '') +
-                        (n == 2 ? '❤️' : '') +
-                        (n >= 3 ? '💕' : '')
-                      }
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
+          {
+            (Platform.OS == "web") && (
+              <Button title="(Matchmake)" onPress={() => { fetchMatches() }} />
             )
-          }}
-          keyExtractor={(item, index) => index.toString()}
-        />
-
-        {
-          /*
-        <Button title="Hello" onPress={async () => {
-          try {
-            const id = await icp.getId();
-            alert('Got id: ' + id)
-          } catch (err) {
-            alert(err)
-            console.log(err)
           }
-        }} />
-          */
-        }
-
-        {
-          /*
-        <Button title="Send encrypted" onPress={async () => {
-          try {
-
-          } catch (err) {
-            alert("ERROR:" + err)
-            console.log(err)
-          }
-        }} />
-          */
-        }
-
-        <Button title="(Load dummy profiles)" onPress={() => { setProfiles(dummyProfiles) }} />
-        <Button title="(Delete all profiles)" onPress={() => { setProfiles([]) }} />
-
-        {
-          (Platform.OS == "web") && (
-            <Button title="(Matchmake)" onPress={() => { fetchMatches() }} />
-          )
-        }
-        <View style={{ marginBottom: 200 }} />
-      </View>
-    </BaseView>
+          <View style={{ marginBottom: 200 }} />
+        </View>
+      </BaseView>
+    </ImageBackground>
   );
 }
 
@@ -190,10 +168,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F9FC',
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 200,
+    height: 200,
     resizeMode: 'contain',
     marginVertical: 20,
+    alignSelf: 'center',
+    justifyContent: 'center',
   },
   listContent: {
     width: '100%',
@@ -221,4 +201,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10, // Ensures spacing between buttons
   },
+  background: {
+    flex: 1,
+    resizeMode: 'cover',
+  }
 });

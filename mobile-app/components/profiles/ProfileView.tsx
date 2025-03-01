@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { StyleSheet, View, ScrollView, ImageBackground } from 'react-native';
 import { Profile, propertyTypes, getSelectedValues, Match, PublicProfile } from '@/types';
 import { ThemedText } from '../ThemedText';
 import BackButton from '../BackButton';
@@ -6,6 +6,8 @@ import { router } from 'expo-router';
 import React, { useContext } from "react";
 import { Button } from "../Button";
 import { MatchesContext } from '@/components/EverythingProvider';
+
+const backgroundImage = require('@/assets/images/Wallpaper_white.png');
 
 interface ProfileReviewProps {
     profile: Profile;
@@ -28,68 +30,73 @@ export default function ProfileReviewScreen({ profile }: ProfileReviewProps) {
     const myMatches = filterMatchesForProfile(matches, profile);
 
     return (
-        <ScrollView style={styles.container}>
-            <ThemedText style={styles.header}>Profile</ThemedText>
-            <BackButton navigate={() => router.push('/profiles')} />
+        <ImageBackground
+            source={backgroundImage}
+            style={styles.background}
+        >
+            <ScrollView style={styles.container}>
+                <ThemedText style={styles.header}>Profile</ThemedText>
+                <BackButton navigate={() => router.push('/profiles')} />
 
-            {/* Basic Profile Info */}
-            <View style={styles.section}>
-                <ThemedText style={styles.sectionTitle}>Personal Information</ThemedText>
-                <ProfileDetail label="First Name" value={profile.firstName} />
-                <ProfileDetail label="Last Name" value={profile.lastName} />
-                <ProfileDetail label="Email" value={profile.contactEmail} />
-                <ProfileDetail label="Location" value={profile.geolocation} />
-                <ProfileDetail label="Max Distance" value={`${profile.maxDistance} km`} />
-                {profile.lastModified && typeof profile.lastModified === "object" && 
-                    <ProfileDetail label="Last Modified" value={profile.lastModified.toDateString()} />}
-            </View>
+                {/* Basic Profile Info */}
+                <View style={styles.section}>
+                    <ThemedText style={styles.sectionTitle}>Personal Information</ThemedText>
+                    <ProfileDetail label="First Name" value={profile.firstName} />
+                    <ProfileDetail label="Last Name" value={profile.lastName} />
+                    <ProfileDetail label="Email" value={profile.contactEmail} />
+                    <ProfileDetail label="Location" value={profile.geolocation} />
+                    <ProfileDetail label="Max Distance" value={`${profile.maxDistance} km`} />
+                    {profile.lastModified && typeof profile.lastModified === "object" && 
+                        <ProfileDetail label="Last Modified" value={profile.lastModified.toDateString()} />}
+                </View>
 
-            {/* Matches */}
-            <View style={styles.section}>
-                <ThemedText style={styles.sectionTitle}>Matches</ThemedText>
-                <Button title="Find matches" onPress={() => { }} />
-                {myMatches.length > 0 ? (
-                    myMatches.map((match, index) => (
-                        <View key={index} style={styles.matchCard}>
-                            <View style={styles.matchHeader}>
-                                <ThemedText style={styles.matchName}>
-                                    {match.match.firstName} {match.match.lastInitial}
-                                </ThemedText>
-                                <ThemedText style={styles.matchScore}>
-                                    {match.score}%
+                {/* Matches */}
+                <View style={styles.section}>
+                    <ThemedText style={styles.sectionTitle}>Matches</ThemedText>
+                    <Button title="Find matches" onPress={() => { }} />
+                    {myMatches.length > 0 ? (
+                        myMatches.map((match, index) => (
+                            <View key={index} style={styles.matchCard}>
+                                <View style={styles.matchHeader}>
+                                    <ThemedText style={styles.matchName}>
+                                        {match.match.firstName} {match.match.lastInitial}
+                                    </ThemedText>
+                                    <ThemedText style={styles.matchScore}>
+                                        {match.score}%
+                                    </ThemedText>
+                                </View>
+                                <ThemedText style={styles.matchDetails}>
+                                    {getMatchReason(profile, match.match)}
                                 </ThemedText>
                             </View>
-                            <ThemedText style={styles.matchDetails}>
-                                {getMatchReason(profile, match.match)}
-                            </ThemedText>
-                        </View>
-                    ))
-                ) : (
-                    <ThemedText style={styles.emptyText}>No matches found.</ThemedText>
-                )}
-            </View>
+                        ))
+                    ) : (
+                        <ThemedText style={styles.emptyText}>No matches found.</ThemedText>
+                    )}
+                </View>
 
-            {/* Interests & Preferences Summary */}
-            <View style={styles.section}>
-                <ThemedText style={styles.sectionTitle}>Your Interests & Preferences</ThemedText>
-                {profile.properties.length > 0 ? (
-                    profile.properties.map((property, index) => (
-                        <View key={index} style={styles.propertyGroup}>
-                            <ThemedText style={styles.propertyLabel}>
-                                {propertyTypes[property.type]?.name}
-                            </ThemedText>
-                            <PropertySummary label="Selected" values={property.is} typeIndex={property.type} />
-                            <PropertySummary label="Preferred" values={property.prefered} typeIndex={property.type} />
-                            <PropertySummary label="Not Preferred" values={property.notPrefered} typeIndex={property.type} />
-                            <PropertySummary label="Must Have" values={property.mustHave} typeIndex={property.type} />
-                            <PropertySummary label="Can't Have" values={property.cantHave} typeIndex={property.type} />
-                        </View>
-                    ))
-                ) : (
-                    <ThemedText style={styles.emptyText}>No properties set.</ThemedText>
-                )}
-            </View>
-        </ScrollView>
+                {/* Interests & Preferences Summary */}
+                <View style={styles.section}>
+                    <ThemedText style={styles.sectionTitle}>Your Interests & Preferences</ThemedText>
+                    {profile.properties.length > 0 ? (
+                        profile.properties.map((property, index) => (
+                            <View key={index} style={styles.propertyGroup}>
+                                <ThemedText style={styles.propertyLabel}>
+                                    {propertyTypes[property.type]?.name}
+                                </ThemedText>
+                                <PropertySummary label="Selected" values={property.is} typeIndex={property.type} />
+                                <PropertySummary label="Preferred" values={property.prefered} typeIndex={property.type} />
+                                <PropertySummary label="Not Preferred" values={property.notPrefered} typeIndex={property.type} />
+                                <PropertySummary label="Must Have" values={property.mustHave} typeIndex={property.type} />
+                                <PropertySummary label="Can't Have" values={property.cantHave} typeIndex={property.type} />
+                            </View>
+                        ))
+                    ) : (
+                        <ThemedText style={styles.emptyText}>No properties set.</ThemedText>
+                    )}
+                </View>
+            </ScrollView>
+        </ImageBackground>
     );
 }
 
@@ -280,4 +287,10 @@ const styles = StyleSheet.create({
         color: "#333",
         flex: 1,
     },
+    background: {
+        flex: 1,
+        resizeMode: "cover",
+        justifyContent: "center",
+        alignItems: "center",
+    }
 });
