@@ -109,20 +109,25 @@ const styles = StyleSheet.create({
     },
     selectedContainer: {
         flexDirection: "row",
+        flexWrap: "wrap",
         marginBottom: 10,
         paddingVertical: 5,
     },
     selectedItem: {
         backgroundColor: "#007AFF",
-        paddingVertical: 6,
-        paddingHorizontal: 12,
+        paddingHorizontal: 15,
         borderRadius: 16,
         marginRight: 8,
+        alignItems: "center", // Ensure text stays centered
+        justifyContent: "center",
     },
     selectedItemText: {
         color: "#fff",
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: "500",
+        textAlign: "center", // Ensures text alignment
+        justifyContent: "center",
+        includeFontPadding: false, // Avoid extra text padding on some Android devices
     },
     searchInput: {
         padding: 12,
@@ -144,7 +149,8 @@ const styles = StyleSheet.create({
     },
     listItemText: {
         fontSize: 16,
-        color: "#333",
+        color: "#fff",
+        fontWeight: "500",
     },
     buttonContainer: {
         marginTop: 10,

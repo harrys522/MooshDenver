@@ -25,7 +25,7 @@ export default function ProfileReviewScreen({ profile }: ProfileReviewProps) {
 
             {/* Property Summary */}
             <View style={styles.section}>
-                <ThemedText style={styles.sectionTitle}>Property Summary</ThemedText>
+                <ThemedText style={styles.sectionTitle}>Summary</ThemedText>
                 {profile.properties.length > 0 ? (
                     profile.properties.map((property, index) => (
                         <View key={index} style={styles.propertyGroup}>
