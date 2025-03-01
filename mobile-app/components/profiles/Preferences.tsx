@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
     View,
-    Button,
     FlatList,
     StyleSheet,
     Modal,
@@ -13,18 +12,18 @@ import { ThemedText } from "../ThemedText";
 
 export interface PreferenceSelectionScreenProps {
     profile: Profile;
-    setProfile: (profile: Profile) => void;
+    modifiedProperties: PropertyEntry[];
+    setModifiedProperties: (props: PropertyEntry[]) => void;
 }
 
 const preferenceTypes = ["prefered", "notPrefered", "mustHave", "cantHave"] as const;
 
-export default function PreferenceSelectionScreen({ profile, setProfile }: PreferenceSelectionScreenProps) {
-    const [modifiedProperties, setModifiedProperties] = useState<PropertyEntry[]>([...profile.properties]);
-    const [selectedType, setSelectedType] = useState<string | null>(null); // Tracks the open modal type
-
-    const finalizePreferences = () => {
-        setProfile({ ...profile, properties: modifiedProperties, lastModified: new Date() });
-    };
+export default function PreferenceSelectionScreen({
+    profile,
+    modifiedProperties,
+    setModifiedProperties,
+}: PreferenceSelectionScreenProps) {
+    const [selectedType, setSelectedType] = useState<string | null>(null);
 
     return (
         <View style={styles.container}>
@@ -43,9 +42,10 @@ export default function PreferenceSelectionScreen({ profile, setProfile }: Prefe
                         <ThemedText style={styles.selectedValues}>
                             {modifiedProperties
                                 .flatMap((prop) =>
-                                    Array.isArray(prop[item as keyof PropertyEntry]) 
-                                        ? (prop[item as keyof PropertyEntry] as number[])
-                                            .map((index) => propertyTypes[prop.type].validFields?.[index] ?? "")
+                                    Array.isArray(prop[item as keyof PropertyEntry])
+                                        ? (prop[item as keyof PropertyEntry] as number[]).map(
+                                              (index) => propertyTypes[prop.type].validFields?.[index] ?? ""
+                                          )
                                         : []
                                 )
                                 .filter((val) => val !== "")
@@ -55,8 +55,6 @@ export default function PreferenceSelectionScreen({ profile, setProfile }: Prefe
                 )}
                 contentContainerStyle={styles.listContainer}
             />
-
-            <Button title="Save Preferences" onPress={finalizePreferences} />
 
             {/* Modal for Editing Preferences */}
             {selectedType && (
@@ -72,7 +70,6 @@ export default function PreferenceSelectionScreen({ profile, setProfile }: Prefe
                                 Edit {selectedType.toUpperCase()} Preferences
                             </ThemedText>
 
-                            {/* Preference Selector Inside Modal */}
                             <PreferenceSelector
                                 preferenceType={selectedType as any}
                                 properties={modifiedProperties}
@@ -101,7 +98,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 20,
         textAlign: "center",
-        color: "#222", // Improved contrast
+        color: "#222",
     },
     preferenceButton: {
         backgroundColor: "#fff",
@@ -128,11 +125,11 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.6)", // Darker overlay for better contrast
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
     },
     modalContainer: {
         width: "95%",
-        height: "80%", // Takes up more vertical space
+        height: "80%",
         backgroundColor: "#fff",
         padding: 20,
         borderRadius: 12,
@@ -148,8 +145,5 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         textAlign: "center",
         color: "#222",
-    },
-    scrollView: {
-        flexGrow: 1,
     },
 });

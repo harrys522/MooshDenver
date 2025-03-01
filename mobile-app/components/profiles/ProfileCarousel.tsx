@@ -4,8 +4,7 @@ import BasicProfileScreen from "./BasicProfile";
 import NewProfileScreen from "./AddProfile";
 import PreferenceSelectionScreen from "./Preferences";
 import ProfileReviewScreen from "./ProfileReview";
-import { Profile } from "@/types";
-
+import { Profile, PropertyEntry } from "@/types";
 import { Button } from "../Button";
 import { encryptProfiles } from "@/services/matchmaking";
 import { FriendsContext, ProfilesContext } from "../EverythingProvider";
@@ -23,13 +22,24 @@ export default function ProfileSetupCarousel() {
         lastName: "",
         contactEmail: "",
         geolocation: "",
-        maxDistance: 50, // Default range value
+        maxDistance: 50,
         properties: [],
         exclusionList: [],
         lastModified: new Date(),
     });
 
+    // Local state for preferences before they are finalized
+    const [modifiedProperties, setModifiedProperties] = useState<PropertyEntry[]>([]);
+
     const handleNext = () => {
+        if (step === 3) {
+            // Finalize preferences before proceeding
+            setProfileData((prev) => ({
+                ...prev,
+                properties: modifiedProperties,
+                lastModified: new Date(),
+            }));
+        }
         if (step < 4) setStep(step + 1);
     };
 
@@ -59,7 +69,11 @@ export default function ProfileSetupCarousel() {
             ) : step === 2 ? (
                 <NewProfileScreen profile={profileData} setProfile={setProfileData} />
             ) : step === 3 ? (
-                <PreferenceSelectionScreen profile={profileData} setProfile={setProfileData} />
+                <PreferenceSelectionScreen
+                    profile={profileData}
+                    modifiedProperties={modifiedProperties}
+                    setModifiedProperties={setModifiedProperties}
+                />
             ) : (
                 <ProfileReviewScreen profile={profileData} />
             )}

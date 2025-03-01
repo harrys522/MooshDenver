@@ -10,7 +10,7 @@ interface ProfileReviewProps {
 export default function ProfileReviewScreen({ profile }: ProfileReviewProps) {
     return (
         <ScrollView style={styles.container}>
-            <ThemedText style={styles.header}>Profile Review</ThemedText>
+            <ThemedText style={styles.header}>Review Profile</ThemedText>
 
             {/* Basic Profile Info */}
             <View style={styles.section}>
@@ -20,7 +20,7 @@ export default function ProfileReviewScreen({ profile }: ProfileReviewProps) {
                 <ProfileDetail label="Email" value={profile.contactEmail} />
                 <ProfileDetail label="Location" value={profile.geolocation} />
                 <ProfileDetail label="Max Distance" value={`${profile.maxDistance} km`} />
-                <ProfileDetail label="Last Modified" value={profile.lastModified.toDateString()} />
+                {profile.lastModified && typeof profile.lastModified === "object" && <ProfileDetail label="Last Modified" value={profile.lastModified.toDateString()} />}
             </View>
 
             {/* Property Summary */}

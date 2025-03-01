@@ -13,14 +13,24 @@ interface PreferenceSelectorProps {
 export default function PreferenceSelector({ preferenceType, properties, setProperties, onClose }: PreferenceSelectorProps) {
     const [searchQuery, setSearchQuery] = useState("");
 
+    // Build a flat array of all valid fields from all property types
     const allValidFields = propertyTypes.flatMap((property, typeIndex) =>
         property.validFields?.map((field) => ({ field, typeIndex })) ?? []
     );
 
+    // Create a set of already selected field names for the given preferenceType.
+    const selectedFields = new Set(
+        properties.flatMap((prop) =>
+            (prop[preferenceType] as number[] | undefined)?.map(
+                (index) => propertyTypes[prop.type].validFields?.[index]
+            ) ?? []
+        )
+    );
+
+    // Filter out fields that either don't match the search query or are already selected.
     const filteredFields = allValidFields.filter(({ field }) =>
-        field.toLowerCase().includes(searchQuery.toLowerCase())
-        &&
-        !properties.find(pe => propertyTypes[pe.type].name.toLowerCase() == field.toLowerCase())
+        field.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !selectedFields.has(field)
     );
 
     const handleValueChange = (selectedValues: string[]) => {
@@ -40,7 +50,7 @@ export default function PreferenceSelector({ preferenceType, properties, setProp
                 updatedProperties.push(propertyEntry);
             }
 
-            const currentSelection = new Set(propertyEntry[preferenceType]);
+            const currentSelection = new Set(propertyEntry[preferenceType] as number[]);
             if (currentSelection.has(valueIndex)) {
                 currentSelection.delete(valueIndex);
             } else {
@@ -134,7 +144,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center", // Ensures text alignment
         justifyContent: "center",
-        includeFontPadding: false, // Avoid extra text padding on some Android devices
+        includeFontPadding: false,
     },
     searchInput: {
         padding: 12,

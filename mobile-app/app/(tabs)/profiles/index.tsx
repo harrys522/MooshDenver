@@ -1,28 +1,27 @@
 import { View, StyleSheet, FlatList, Image, TouchableOpacity, Text, RefreshControl } from 'react-native';
 import { useState } from 'react';
+import { useContext } from 'react';
 import { ThemedText } from '@/components/ThemedText';
-import { ProfileView } from '@/components/profiles/ProfileView';
 import { router } from 'expo-router';
 
 import { createActor } from "@/services/icp-profiles"
 import { AnonymousIdentity, SignIdentity } from '@dfinity/agent';
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 
-import { useContext } from 'react';
-import { IcpContext, MatchesContext, ProfilesContext } from '@/components/EverythingProvider';
-import { encryptProfiles, samplePublicKey, sendMatchmakingProfiles, getPublicKey } from '@/services/matchmaking';
+import { MatchesContext, ProfilesContext } from '@/components/EverythingProvider';
+import { getPublicKey } from '@/services/matchmaking';
+import { IcpContext } from '@/components/EverythingProvider';
+import { profiles } from '@/services/test-profiles';
+import { encryptProfiles, samplePublicKey, sendMatchmakingProfiles } from '@/services/matchmaking';
 
 import dummyProfiles from '@/services/dummyProfiles.json'
 
 import { Button } from '@/components/Button';
-
-import { styles } from '@/app/globalStyles'
 import { BaseView } from '@/components/BaseView';
 import { Match, MatchWith, Profile, PublicProfile } from '@/types';
 
-const logo = require('@/assets/images/dating-app-btc-logo.png');
+const logo = require('@/assets/images/Cloud_white.png');
 
-// Main screen is the profiles
 export default function ProfileScreen() {
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
 
@@ -171,7 +170,47 @@ export default function ProfileScreen() {
 
         <Button title="(Load dummy profiles)" onPress={() => { setProfiles(dummyProfiles) }} />
       </View>
-    </BaseView >
+    </BaseView>
   );
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: '#F7F9FC',
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    resizeMode: 'contain',
+    marginVertical: 20,
+  },
+  listContent: {
+    width: '100%',
+    paddingVertical: 10,
+  },
+  profileItem: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  profileText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  buttonContainer: {
+    marginTop: 20,
+    width: '100%',
+    alignItems: 'center',
+    gap: 10, // Ensures spacing between buttons
+  },
+});
