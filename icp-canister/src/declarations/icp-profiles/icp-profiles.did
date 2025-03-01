@@ -1,0 +1,30 @@
+type Profile = text;
+type FriendInvite = text;
+type Friend = 
+ record {
+   desc: text;
+   id: principal;
+   name: text;
+   pfp: text;
+ };
+service : {
+  _generateInviteCode: () -> (text);
+  addFriend: (text, text, text, principal, FriendInvite) -> (text);
+  addProfile: (Profile) -> () oneway;
+  getAllProfilesBasic: () -> (vec record {
+                                    principal;
+                                    Profile;
+                                  });
+  getAllProfilesWithDepth: (int8) -> (vec record {
+                                            principal;
+                                            Profile;
+                                          });
+  getFriends: () -> (vec principal);
+  getId: () -> (text);
+  getInvite: () -> (FriendInvite);
+  getLatestFriend: () -> (opt Friend);
+  getProfile: () -> (opt Profile);
+  greet: (Profile) -> (text);
+  removeFriend: (principal) -> () oneway;
+  removeProfile: () -> () oneway;
+}
