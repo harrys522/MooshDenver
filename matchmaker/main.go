@@ -176,6 +176,10 @@ func compare(pl, pr Profile) int {
 func processProfiles(profiles []Profile) []Match {
 	matches := []Match{}
 
+	if len(profiles) < 2 {
+		return []Match{}
+	}
+
 	fmt.Println("Started matchmaking")
 	for i, p1 := range profiles[:len(profiles)-1] {
 
@@ -623,6 +627,9 @@ func main() {
 				log.Println("Decrypted JSON:", profiles)
 			}
 		}
+
+		fmt.Println("Decrypted profiles:")
+		fmt.Println(profiles)
 
 		// Process profiles
 		matches := processProfiles(profiles)

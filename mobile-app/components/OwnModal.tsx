@@ -28,12 +28,13 @@ const style = StyleSheet.create({
         flex: 1,
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
 
     modalContent: {
         padding: 20,
         borderRadius: 10,
         backgroundColor: 'white',
+        minWidth: 350,
     },
 });

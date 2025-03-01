@@ -200,11 +200,12 @@ export const EverythingProvider: React.FC<{ children: ReactNode }> = ({ children
                     await actor.addProfile(profileEncoded)
                 }
             } catch (err) {
+                alert('cant encode icp' + err)
                 console.error('Error encoding in icp: ' + err)
             }
         }
 
-        if (profiles) {
+        if (profiles.length > 0) {
             setItem('profiles', JSON.stringify(profiles))
 
             syncWithIcp()

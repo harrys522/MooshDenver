@@ -222,7 +222,7 @@ actor {
   // Real meet and potatos, the functions to find profiles.
   // ------------------------------------------------------------------
   
-  func _getAllProfilesWithDepth(user: Principal, maxDepth : Int8) : async ([(Principal, Profile)]) {
+  public func _getAllProfilesWithDepth(user: Principal, maxDepth : Int8) : async ([(Principal, Profile)]) {
       // Go through own friends, then go through friend's friends.
 
     var profilesMap = HashMap.HashMap<Principal, Profile>(10, Principal.equal, Principal.hash);

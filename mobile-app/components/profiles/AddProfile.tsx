@@ -39,9 +39,6 @@ export default function NewProfileScreen({ profile, setProfile }: NewProfileScre
                 if (item.name === "Birthday") {
                     return (
                         <>
-                            <Text> Hello </Text>
-                            <Text> {profileProperty?.is[0]}</Text>
-
                             <DateSelector
                                 label={item.name}
                                 selectedDate={(profileProperty?.is[0]) ? (profileProperty?.is[0]) : 1_235_900_000}

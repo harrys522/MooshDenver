@@ -1,4 +1,4 @@
-import { View, StyleSheet, FlatList, Image, TouchableOpacity, Text, RefreshControl } from 'react-native';
+import { View, StyleSheet, FlatList, Image, TouchableOpacity, Text, RefreshControl, Platform } from 'react-native';
 import { useState } from 'react';
 import { useContext } from 'react';
 import { ThemedText } from '@/components/ThemedText';
@@ -58,16 +58,14 @@ export default function ProfileScreen() {
       for (let i = 0; i < icpProfiles.length; i++) {
         console.log(icpProfiles[i])
         try {
-          encryptedProfiles.push(JSON.parse(decodeURIComponent(atob(icpProfiles[i]))))
+          encryptedProfiles.push(JSON.parse(decodeURIComponent(atob(icpProfiles[i][1]))))
         } catch (err) {
           console.log("Couldn't decode profile: " + encryptedProfiles)
         }
       }
 
-      // Debug, just send my profiles:
-      const response = await sendMatchmakingProfiles([encryptProfiles(samplePublicKey, profiles)])
+      const response = await sendMatchmakingProfiles(encryptedProfiles)
 
-      alert('Got response: ' + response)
       setMatches(response)
 
       //const response = await sendMatchmakingProfiles([encryptProfiles(samplePublicKey, profiles)])
@@ -130,7 +128,7 @@ export default function ProfileScreen() {
                         (n == 0 ? '💔' : '') +
                         (n == 1 ? '❤️' : '') +
                         (n == 2 ? '❤️' : '') +
-                        (n >= 3 ? '❤️' : '')
+                        (n >= 3 ? '💕' : '')
                       }
                     </Text>
                   </View>
@@ -169,6 +167,14 @@ export default function ProfileScreen() {
         }
 
         <Button title="(Load dummy profiles)" onPress={() => { setProfiles(dummyProfiles) }} />
+        <Button title="(Delete all profiles)" onPress={() => { setProfiles([]) }} />
+
+        {
+          (Platform.OS == "web") && (
+            <Button title="(Matchmake)" onPress={() => { fetchMatches() }} />
+          )
+        }
+        <View style={{ marginBottom: 200 }} />
       </View>
     </BaseView>
   );

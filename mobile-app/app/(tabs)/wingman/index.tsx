@@ -205,8 +205,13 @@ export default function ProfileScreen() {
                 }}
                 value={btoa(encodeURIComponent(JSON.stringify({ profile: ownProfile, invite: inviteCode })))}
               />
-              <Text> {ownProfile.id} </Text>
-              <Text> {inviteCode} </Text>
+              {
+                <Text> {ownProfile.id} </Text>
+                /*
+                <Text> {ownProfile.id} </Text>
+                <Text> {inviteCode} </Text>
+                */
+              }
             </View>
           ) : (
             <ActivityIndicator size='large' />

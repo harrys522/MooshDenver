@@ -9,11 +9,15 @@ import { Text } from 'react-native';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { EverythingProvider } from '@/components/EverythingProvider';
+import { LogBox } from 'react-native';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+
+  LogBox.ignoreAllLogs()
+
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
