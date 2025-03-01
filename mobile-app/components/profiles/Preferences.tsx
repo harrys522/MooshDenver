@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { View, Button, FlatList, StyleSheet } from "react-native";
-import { Profile, PropertyEntry } from "@/types";
+import {
+    View,
+    Button,
+    FlatList,
+    StyleSheet,
+    Modal,
+    TouchableOpacity,
+} from "react-native";
+import { Profile, PropertyEntry, propertyTypes } from "@/types";
 import PreferenceSelector from "./PreferenceSelector";
 import { ThemedText } from "../ThemedText";
 
@@ -13,6 +20,7 @@ const preferenceTypes = ["prefered", "notPrefered", "mustHave", "cantHave"] as c
 
 export default function PreferenceSelectionScreen({ profile, setProfile }: PreferenceSelectionScreenProps) {
     const [modifiedProperties, setModifiedProperties] = useState<PropertyEntry[]>([...profile.properties]);
+    const [selectedType, setSelectedType] = useState<string | null>(null); // Tracks the open modal type
 
     const finalizePreferences = () => {
         setProfile({ ...profile, properties: modifiedProperties, lastModified: new Date() });
@@ -22,17 +30,59 @@ export default function PreferenceSelectionScreen({ profile, setProfile }: Prefe
         <View style={styles.container}>
             <ThemedText style={styles.header}>Define Your Preferences</ThemedText>
 
-            {/* FlatList to handle scrolling */}
+            {/* Pressable Selectors */}
             <FlatList
                 data={preferenceTypes}
                 keyExtractor={(item) => item}
                 renderItem={({ item }) => (
-                    <PreferenceSelector preferenceType={item} properties={modifiedProperties} setProperties={setModifiedProperties} />
+                    <TouchableOpacity
+                        style={styles.preferenceButton}
+                        onPress={() => setSelectedType(item)}
+                    >
+                        <ThemedText style={styles.buttonText}>{item.toUpperCase()}</ThemedText>
+                        <ThemedText style={styles.selectedValues}>
+                            {modifiedProperties
+                                .flatMap((prop) =>
+                                    Array.isArray(prop[item as keyof PropertyEntry]) 
+                                        ? (prop[item as keyof PropertyEntry] as number[])
+                                            .map((index) => propertyTypes[prop.type].validFields?.[index] ?? "")
+                                        : []
+                                )
+                                .filter((val) => val !== "")
+                                .join(", ") || "None Selected"}
+                        </ThemedText>
+                    </TouchableOpacity>
                 )}
                 contentContainerStyle={styles.listContainer}
             />
 
             <Button title="Save Preferences" onPress={finalizePreferences} />
+
+            {/* Modal for Editing Preferences */}
+            {selectedType && (
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={!!selectedType}
+                    onRequestClose={() => setSelectedType(null)}
+                >
+                    <View style={styles.modalBackground}>
+                        <View style={styles.modalContainer}>
+                            <ThemedText style={styles.modalHeader}>
+                                Edit {selectedType.toUpperCase()} Preferences
+                            </ThemedText>
+
+                            {/* Preference Selector Inside Modal */}
+                            <PreferenceSelector
+                                preferenceType={selectedType as any}
+                                properties={modifiedProperties}
+                                setProperties={setModifiedProperties}
+                                onClose={() => setSelectedType(null)}
+                            />
+                        </View>
+                    </View>
+                </Modal>
+            )}
         </View>
     );
 }
@@ -44,12 +94,62 @@ const styles = StyleSheet.create({
         backgroundColor: "#f9f9f9",
     },
     listContainer: {
-        paddingBottom: 20, // Prevent clipping at the bottom
+        paddingBottom: 20,
     },
     header: {
+        fontSize: 22,
+        fontWeight: "bold",
+        marginBottom: 20,
+        textAlign: "center",
+        color: "#222", // Improved contrast
+    },
+    preferenceButton: {
+        backgroundColor: "#fff",
+        padding: 15,
+        borderRadius: 8,
+        marginBottom: 12,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    buttonText: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#007AFF",
+    },
+    selectedValues: {
+        fontSize: 14,
+        color: "#333",
+        marginTop: 5,
+    },
+    modalBackground: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.6)", // Darker overlay for better contrast
+    },
+    modalContainer: {
+        width: "95%",
+        height: "80%", // Takes up more vertical space
+        backgroundColor: "#fff",
+        padding: 20,
+        borderRadius: 12,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        elevation: 6,
+    },
+    modalHeader: {
         fontSize: 20,
         fontWeight: "bold",
-        marginBottom: 15,
+        marginBottom: 10,
         textAlign: "center",
+        color: "#222",
+    },
+    scrollView: {
+        flexGrow: 1,
     },
 });
