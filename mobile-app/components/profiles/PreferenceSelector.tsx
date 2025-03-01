@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, FlatList, TouchableOpacity, StyleSheet, ScrollView, Button } from "react-native";
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, ScrollView, Button } from "react-native";
 import { PropertyEntry, propertyTypes } from "@/types";
 import { ThemedText } from "../ThemedText";
 
@@ -19,6 +19,8 @@ export default function PreferenceSelector({ preferenceType, properties, setProp
 
     const filteredFields = allValidFields.filter(({ field }) =>
         field.toLowerCase().includes(searchQuery.toLowerCase())
+        &&
+        !properties.find(pe => propertyTypes[pe.type].name.toLowerCase() == field.toLowerCase())
     );
 
     const handleValueChange = (selectedValues: string[]) => {
@@ -64,7 +66,7 @@ export default function PreferenceSelector({ preferenceType, properties, setProp
                     )
                     .map((val, index) => (
                         <TouchableOpacity key={index} style={styles.selectedItem} onPress={() => handleValueChange([val])}>
-                            <ThemedText style={styles.selectedItemText}>{val} ✕</ThemedText>
+                            <Text style={styles.selectedItemText}> {val} ✕</Text>
                         </TouchableOpacity>
                     ))}
             </ScrollView>
@@ -83,7 +85,7 @@ export default function PreferenceSelector({ preferenceType, properties, setProp
                 keyExtractor={(item) => item.field}
                 renderItem={({ item }) => (
                     <TouchableOpacity onPress={() => handleValueChange([item.field])} style={styles.listItem}>
-                        <ThemedText>{item.field}</ThemedText>
+                        <Text>{item.field}</Text>
                     </TouchableOpacity>
                 )}
                 keyboardShouldPersistTaps="handled"
@@ -110,21 +112,26 @@ const styles = StyleSheet.create({
     selectedContainer: {
         flexDirection: "row",
         flexWrap: "wrap",
-        marginBottom: 10,
-        paddingVertical: 5,
+        //marginBottom: 10,
+        //paddingVertical: 5,
+        height: 60,
     },
     selectedItem: {
         backgroundColor: "#007AFF",
+        paddingVertical: 5,
         paddingHorizontal: 15,
         borderRadius: 16,
         marginRight: 8,
+        display: 'flex',
         alignItems: "center", // Ensure text stays centered
         justifyContent: "center",
+
+        height: 30,
     },
     selectedItemText: {
         color: "#fff",
         fontSize: 16,
-        fontWeight: "500",
+        fontWeight: "bold",
         textAlign: "center", // Ensures text alignment
         justifyContent: "center",
         includeFontPadding: false, // Avoid extra text padding on some Android devices

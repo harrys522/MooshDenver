@@ -12,6 +12,7 @@ import * as SecureStore from 'expo-secure-store';
 import { ProfileWingman } from '@/types';
 import { Profile } from '@/services/types';
 import { ActivityIndicator, Platform, Text } from 'react-native';
+import { encryptProfiles, samplePublicKey } from '@/services/matchmaking';
 
 export type IcpActor = ActorSubclass<_SERVICE>;
 export const IcpContext = createContext<IcpActor>()
@@ -24,8 +25,7 @@ interface FriendsContextType {
 export const FriendsContext = createContext<[ProfileWingman[], (newValue: ProfileWingman[]) => void]>()
 
 export const ProfilesContext = createContext<[Profile[], (newValue: Profile[]) => void]>()
-//export const IcpContext = createContext<IcpActor>()
-//
+export const MatchesContext = createContext<[Match[], (newValue: Match[]) => void]>()
 
 function setItem(key: string, value: string | null) {
     try {
@@ -65,8 +65,10 @@ function getItem(key: string): string | null {
 export const EverythingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [actor, setActor] = useState<IcpActor>();
     const [ownProfile, setOwnProfile] = useState<ProfileWingman>()
-    const [profiles, setProfiles] = useState<Profile[]>([])
+
     const [friends, setFriends] = useState<ProfileWingman[]>([])
+    const [profiles, setProfiles] = useState<Profile[]>([])
+    const [matches, setMatches] = useState<Matches[]>([])
 
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
@@ -137,6 +139,22 @@ export const EverythingProvider: React.FC<{ children: ReactNode }> = ({ children
             setFriends(JSON.parse(friendsStr))
         }
 
+        console.log('getting profiles')
+        const profilesStr = getItem('profiles')
+        if (!profilesStr) {
+            setProfiles([])
+        } else {
+            setProfiles(JSON.parse(profilesStr))
+        }
+
+        console.log('getting matches')
+        const matchesStr = getItem('matches')
+        if (!matchesStr) {
+            setMatches([])
+        } else {
+            setMatches(JSON.parse(matchesStr))
+        }
+
         console.log('making actor')
 
         const actor = createActor(process.env.EXPO_PUBLIC_CANISTER_ID_ICP_PROFILES as string, {
@@ -164,9 +182,32 @@ export const EverythingProvider: React.FC<{ children: ReactNode }> = ({ children
         }
     }, [friends])
     useEffect(() => {
+        // TODO: Check against icp
+        if (matches) {
+            setItem('matches', JSON.stringify(matches))
+        }
+    }, [matches])
+
+    useEffect(() => {
         // TODO: Also encrypt and periodically send to icp here. (Encrypted ofc).
+        //
+        const syncWithIcp = async () => {
+            try {
+                const profileSet = encryptProfiles(samplePublicKey, profiles)
+                const profileEncoded = btoa(encodeURIComponent(JSON.stringify(profileSet)))
+
+                if (actor) {
+                    await actor.addProfile(profileEncoded)
+                }
+            } catch (err) {
+                console.error('Error encoding in icp: ' + err)
+            }
+        }
+
         if (profiles) {
             setItem('profiles', JSON.stringify(profiles))
+
+            syncWithIcp()
         }
     }, [profiles])
 
@@ -187,7 +228,7 @@ export const EverythingProvider: React.FC<{ children: ReactNode }> = ({ children
     }, [])
 
 
-    if (isLoading || (!actor || !ownProfile)) {
+    if (isLoading || (!actor || !ownProfile || !profiles)) {
         // TODO: Show fancier icon here.
         return <ActivityIndicator size='large' />
     }
@@ -197,7 +238,9 @@ export const EverythingProvider: React.FC<{ children: ReactNode }> = ({ children
             <WingmanProfileContext.Provider value={[ownProfile, setOwnProfile]}>
                 <ProfilesContext.Provider value={[profiles, setProfiles]}>
                     <FriendsContext.Provider value={[friends, setFriends]}>
-                        {children}
+                        <MatchesContext.Provider value={[matches, setMatches]}>
+                            {children}
+                        </MatchesContext.Provider>
                     </FriendsContext.Provider>
                 </ProfilesContext.Provider>
             </WingmanProfileContext.Provider>

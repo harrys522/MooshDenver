@@ -9,6 +9,26 @@ export interface ProfileWingman {
     pfp: string;
 }
 
+export interface PublicProfile {
+    firstName: string;
+    lastInitial: string;
+    contactEmail: string;
+
+    properties: PropertyEntry[];
+}
+
+export interface Match {
+    // Two profiles
+    profiles: PublicProfile[];
+    score: number;
+}
+
+export interface MatchWith {
+    // One profile
+    match: PublicProfile;
+    score: number;
+}
+
 export interface PropertyEntry {
     type: number; // Index into property types array!
 
@@ -54,9 +74,9 @@ export const propertyTypes: PropertyType[] = [
     { name: "Drug usage", canSelectMultiple: true, validFields: ["Tobacco", "Weed", "Mushrooms"] },
     { name: "Interests", canSelectMultiple: true, validFields: ["Travel", "Sports", "Reading", "Hiking", "Gaming", "Camping", "Crypto"] },
     { name: "Religion", canSelectMultiple: false, validFields: [" Atheist / Agnostic", " Christian", " Jewish"] },
-    { name: "Birthday", canSelectMultiple: false, validRange: [-2204107955, 1172486845] },
-    { name: "Height (cm)", canSelectMultiple: false, validRange: [50, 280] },
-    { name: "Weight (kg)", canSelectMultiple: false, validRange: [30, 400] },
+    { name: "Birthday", canSelectMultiple: false, validRange: [-2204107.955, 1172486.845] },
+    { name: "Height (cm)", canSelectMultiple: false, validRange: [50, 200] },
+    { name: "Weight (kg)", canSelectMultiple: false, validRange: [30, 200] },
 ];
 
 export function getProperty(

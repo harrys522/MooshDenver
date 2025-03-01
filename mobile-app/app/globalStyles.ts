@@ -23,7 +23,9 @@ export const styles = StyleSheet.create({
         marginLeft: 20,
     },
     profileItem: {
-        padding: 15,
+        padding: 30,
+        borderRadius: 10,
+        margin: 5,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
         backgroundColor: '#fff',

@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatList, StyleSheet } from "react-native";
+import { FlatList, StyleSheet, Text } from "react-native";
 import { Selector, MultiSelector, RangeSlider, DateSelector } from "./Selectors";
 import { Profile, propertyTypes, PropertyEntry, getProperty, getSelectedValues } from "@/types";
 
@@ -31,57 +31,62 @@ export default function NewProfileScreen({ profile, setProfile }: NewProfileScre
 
     return (
         <FlatList
-        data={propertyTypes}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item, index }) => {
-            const profileProperty = getProperty(profile, item.name, propertyTypes);
+            data={propertyTypes}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item, index }) => {
+                const profileProperty = getProperty(profile, item.name, propertyTypes);
 
-            if (item.name === "Birthday") {
-            return (
-                <DateSelector
-                    label={item.name}
-                    selectedDate={profileProperty?.is[0] ?? new Date().setFullYear(1990, 0, 1)}
-                    onDateChange={(value) => handleValueChange(index, value)}
-                />
-            );
-            }
+                if (item.name === "Birthday") {
+                    return (
+                        <>
+                            <Text> Hello </Text>
+                            <Text> {profileProperty?.is[0]}</Text>
 
-            if (item.validRange) {
-            return (
-                    <RangeSlider
-                        label={item.name}
-                        min={item.validRange[0]}
-                        max={item.validRange[1]}
-                        value={profileProperty?.is[0] ?? item.validRange[0]}
-                        onChange={(value) => handleValueChange(index, value)}
-                    />
-                );
-            }
+                            <DateSelector
+                                label={item.name}
+                                selectedDate={(profileProperty?.is[0]) ? (profileProperty?.is[0]) : 1_235_900_000}
+                                onDateChange={(value) => handleValueChange(index, value)}
+                            />
+                        </>
+                    );
+                }
 
-            if (item.canSelectMultiple) {
-            return (
-                    <MultiSelector
+                if (item.validRange) {
+                    return (
+                        <RangeSlider
+                            label={item.name}
+                            min={item.validRange[0]}
+                            max={item.validRange[1]}
+                            value={profileProperty?.is[0] ?? item.validRange[0]}
+                            onChange={(value) => handleValueChange(index, value)}
+                        />
+                    );
+                }
+
+                if (item.canSelectMultiple) {
+                    return (
+                        <MultiSelector
+                            label={item.name}
+                            options={item.validFields ?? []}
+                            selectedValues={getSelectedValues(index, profileProperty?.is ?? [], propertyTypes)}
+                            onSelectedItemsChange={(values) => {
+                                const selectedIndexes = values.map(value => item.validFields?.indexOf(value) ?? -1).filter(i => i !== -1);
+                                handleValueChange(index, selectedIndexes);
+                            }}
+                        />
+                    );
+                }
+
+                return (
+                    <Selector
                         label={item.name}
                         options={item.validFields ?? []}
-                        selectedValues={getSelectedValues(index, profileProperty?.is ?? [], propertyTypes)}
-                        onSelectedItemsChange={(values) => {
-                            const selectedIndexes = values.map(value => item.validFields?.indexOf(value) ?? -1).filter(i => i !== -1);
-                            handleValueChange(index, selectedIndexes);
-                        }}
+                        selectedValue={profileProperty?.is[0] ?? 0}
+                        onValueChange={(value) => handleValueChange(index, value)}
                     />
                 );
-            }
-
-            return (
-                <Selector
-                    label={item.name}
-                    options={item.validFields ?? []}
-                    selectedValue={profileProperty?.is[0] ?? 0}
-                    onValueChange={(value) => handleValueChange(index, value)}
-                />
-            );
-        }}
-        contentContainerStyle={styles.container}
+            }}
+            contentContainerStyle={styles.container}
         />
     );
 }

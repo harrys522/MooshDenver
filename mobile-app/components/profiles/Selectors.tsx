@@ -67,11 +67,13 @@ const DateSelector: React.FC<DateSelectorProps> = ({ label, selectedDate, onDate
             <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.dateButton}>
                 <Text style={styles.dateText}>{new Date(selectedDate * 1000).toLocaleDateString()}</Text>
             </TouchableOpacity>
+
             {showPicker && (
                 <DateTimePicker
+                    style={{ width: 100 }}
                     value={new Date(selectedDate * 1000)}
                     mode="date"
-                    display="default"
+                    display="inline"
                     onChange={(_, date) => {
                         if (date) {
                             onDateChange(Math.floor(date.getTime() / 1000));
@@ -102,7 +104,11 @@ const RangeSlider = ({ label, min, max, value, onChange }: RangeSliderProps) => 
     return (
         <View style={styles.inputContainer}>
             <Text style={styles.label}>
-                {label}: {sliderValue}
+                {label}: {
+                    (value == min ? '< ' : '') +
+                    (value == max ? '> ' : '') +
+                    sliderValue
+                }
             </Text>
             <Slider
                 style={{ width: "100%", height: 40 }}
@@ -110,7 +116,7 @@ const RangeSlider = ({ label, min, max, value, onChange }: RangeSliderProps) => 
                 maximumValue={max}
                 step={1}
                 value={value}
-                onValueChange={setSliderValue} // Immediate feedback
+                onValueChange={(v) => setSliderValue(v)} // Immediate feedback
                 onSlidingComplete={handleSlidingComplete} // Commit final value
                 minimumTrackTintColor="#007AFF"
                 maximumTrackTintColor="#d3d3d3"

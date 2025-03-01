@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import BasicProfileScreen from "./BasicProfile";
 import NewProfileScreen from "./AddProfile";
@@ -7,8 +7,16 @@ import ProfileReviewScreen from "./ProfileReview";
 import { Profile } from "@/types";
 
 import { Button } from "../Button";
+import { encryptProfiles } from "@/services/matchmaking";
+import { FriendsContext, ProfilesContext } from "../EverythingProvider";
+import { useRouter } from "expo-router";
 
 export default function ProfileSetupCarousel() {
+
+    const [friends, setFriends] = useContext(FriendsContext);
+    const [profiles, setProfiles] = useContext(ProfilesContext);
+    const router = useRouter();
+
     const [step, setStep] = useState(1);
     const [profileData, setProfileData] = useState<Profile>({
         firstName: "",
@@ -32,6 +40,8 @@ export default function ProfileSetupCarousel() {
     const finalizeProfile = () => {
         console.log(profileData.properties);
 
+        setProfiles([...profiles, profileData])
+        router.push('/(tabs)/profiles')
     }
 
     return (

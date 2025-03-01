@@ -102,7 +102,7 @@ var PropertyTypes = []PropertyType{
 	{"Religion", 10, true, []string{"⚛️ Atheist / Agnostic", "✝️ Christian", "✡️ Jewish"}, nil},
 
 	// Birthday is in unix timestamp seconds.
-	{"Birthday", 100, true, nil, []int{-2204107955, 1172486845}},
+	{"Birthday", 100, true, nil, []int{1_235_900_000, 1_172_486_845}},
 	// Height is in cm
 	{"Height", 100, true, nil, []int{50, 280}},
 	// Weight in kg
@@ -438,15 +438,15 @@ func main() {
 
 	//
 	bytes, _ := json.Marshal(profiles)
+	os.WriteFile("dummyProfiles.json", bytes, 0o777)
+	fmt.Println("Saved dummy profiles to dummyProfiles.json")
 
-	matches := processProfiles(profiles)
-
-	for _, m := range matches {
-		fmt.Println(m)
-	}
-
-	bytes, _ := json.Marshal(profiles)
-	fmt.Println("Naive encoding bytes:", len(bytes))
+	// matches := processProfiles(profiles)
+	//
+	// for _, m := range matches {
+	// 	fmt.Println(m)
+	// }
+	//
 
 	// bytes, _ = msgpack.Marshal(profiles)
 	// fmt.Println("Message pack encoding bytes:", len(bytes))

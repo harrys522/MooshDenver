@@ -1,14 +1,15 @@
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Profile, propertyTypes, getSelectedValues } from '@/types';
+import { Profile, propertyTypes, getSelectedValues, Match } from '@/types';
 import { ThemedText } from '../ThemedText';
 import BackButton from '../BackButton';
 import { router } from 'expo-router';
 
 interface ProfileItemProps {
     profile: Profile;
+    matches: Match[];
 }
 
-export function ProfileView({ profile }: ProfileItemProps) {
+export function ProfileView({ profile, matches }: ProfileItemProps) {
     return (
         <ScrollView style={styles.container}>
             <BackButton navigate={() => router.back()} />

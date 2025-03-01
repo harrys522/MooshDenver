@@ -1,4 +1,4 @@
-import { Profile } from "@/types";
+import { Match, Profile } from "@/types";
 import forge from "node-forge";
 
 const backendUrl = process.env.EXPO_PUBLIC_MATCH_URL || 'https://denver.moosh.gg'
@@ -73,7 +73,7 @@ export async function sendMatchmakingProfiles(encryptedProfileSets: Confidential
     if (!res.ok) {
         throw new Error('Matchmaking response was not ok')
     }
-    const data = await res.json()
+    const data = await res.json() as Match[]
     return data
 }
 
