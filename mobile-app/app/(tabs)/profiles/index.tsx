@@ -78,6 +78,11 @@ export default function ProfileScreen() {
     }
   }
 
+  const addRandom = async () => {
+    const unique = dummyProfiles.filter(d => !profiles.find(p => d.contactEmail === p.contactEmail))
+    setProfiles([...profiles, unique[Math.ceil(Math.random() * (unique.length - 1))]])
+  }
+
   return (
     <BaseView
       refreshControl={
@@ -116,10 +121,6 @@ export default function ProfileScreen() {
                         {profile.firstName} {profile.lastName}
                       </ThemedText>
 
-                      <Text> {
-                        (new Date()).getFullYear() - (new Date(getProperty(profile, "Birthday", propertyTypes)?.is[0] * 1000) ?? new Date()).getFullYear()
-                      } y/o </Text>
-                      <Text> Likes: {} </Text>
                     </View>
 
                     <Text style={{ fontWeight: '900', fontSize: 20 }}>
@@ -168,7 +169,7 @@ export default function ProfileScreen() {
           */
         }
 
-        <Button title="(Load dummy profiles)" onPress={() => { setProfiles(dummyProfiles) }} />
+        <Button title="(Add test profiles)" onPress={() => { addRandom() }} />
         <Button title="(Delete all profiles)" onPress={() => { setProfiles([]) }} />
 
         {

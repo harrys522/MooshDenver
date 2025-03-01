@@ -26,6 +26,7 @@ import (
 
 	"crypto/sha256"
 	"fmt"
+	mrand "math/rand"
 	"time"
 )
 
@@ -154,12 +155,14 @@ func compare(pl, pr Profile) int {
 				} else {
 					// Compare as range
 
-					if len(propl.Prefered) > 0 {
+					if len(propl.Prefered) > 1 {
 						if propr.Is[0] >= propl.Prefered[0] && propr.Is[0] <= propr.Prefered[1] {
 							// It's in the range so it's good!
 							score += weight
 						}
+					}
 
+					if len(propl.NotPrefered) > 1 {
 						if propr.Is[0] >= propl.NotPrefered[0] && propr.Is[0] <= propr.NotPrefered[1] {
 							// It's in the bad range so it's bad!
 							score -= weight - 10
@@ -425,30 +428,53 @@ func main() {
 		},
 	}
 
-	// Generating 7 more profiles dynamically for variety
-	for i := 4; i <= 10; i++ {
+	firstNames := []string{"John", "Alice", "Bob", "Charlie", "David", "Emma", "Frank", "Grace", "Henry", "Ivy", "Jack", "Kelly"}
+	lastNames := []string{"Doe", "Smith", "Johnson", "Brown", "Davis", "Miller", "Wilson", "Taylor", "Anderson", "Thomas", "Jackson", "White"}
+
+	for i := 4; i <= 800; i++ {
+		fname := firstNames[mrand.Int()%len(firstNames)]
+		lname := lastNames[mrand.Int()%len(lastNames)]
+
+		age1 := (1199145600 - (mrand.Int() % 631152000))
+		age2 := (1199145600 - (mrand.Int() % 631152000))
+
+		sex := (i + 1) % 2
+		_sex := (sex + 1) % 2
+
 		profiles = append(profiles, Profile{
-			FirstName:    fmt.Sprintf("User%d", i),
-			LastName:     "Doe",
-			ContactEmail: fmt.Sprintf("user%d@example.com", i),
+			FirstName:    fname,
+			LastName:     lname,
+			ContactEmail: fmt.Sprintf("%s-%s%d@example.com", fname, lname, i),
 			Geolocation:  "Unknown",
 			MaxDistance:  float32(50 + i*10),
 			Properties: []PropertyEntry{
-				{Type: 0, Is: []int{i % 2}, Prefered: []int{(i + 1) % 2}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}}, // Alternating Male/Female
-				{Type: 1, Is: []int{i % 6}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},            // Ethnicity rotating
-				{Type: 2, Is: []int{i % 12}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},           // Star sign rotating
-				{Type: 6, Is: []int{i % 7}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},            // Interest rotating
-				{Type: 9, Is: []int{160 + (i % 10)}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},   // Height varies between 160-170
+				{Type: 0, Is: []int{i % 2}, Prefered: []int{(i + 1) % 2}, NotPrefered: []int{}, MustHave: []int{_sex}, CantHave: []int{}},                                                     // Alternating Male/Female
+				{Type: 1, Is: []int{i % 6}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},                                                                    // Ethnicity rotating
+				{Type: 2, Is: []int{i % 12}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},                                                                   // Star sign rotating
+				{Type: 6, Is: []int{i % 7}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},                                                                    // Interest rotating
+				{Type: 8, Is: []int{(1199145600 - (mrand.Int() % 631152000))}, Prefered: []int{min(age1, age2), max(age1, age2)}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}}, // Interest rotating
+				// {Type: 8, Is: []int{1199145600 - (mrand.Int() % 631,152,000)}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},   // Height varies between 160-170
+				{Type: 9, Is: []int{160 + (i % 10)}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}}, // Height varies between 160-170
 			},
 			ExclusionList: [][32]byte{},
 			LastModified:  time.Now(),
 		})
 	}
 
+	// for i := range profiles {
+	// 	profiles[i].Properties = append(profiles[i].Properties, {
+	// 		Type: 8, Is: []int{ 10_000_000 },
+	// 		})
+	// }
+
 	//
 	bytes, _ := json.Marshal(profiles)
 	os.WriteFile("dummyProfiles.json", bytes, 0o777)
 	fmt.Println("Saved dummy profiles to dummyProfiles.json")
+
+	bytes, _ = json.Marshal(PropertyTypes)
+	os.WriteFile("propertyTypes.json", bytes, 0o777)
+	fmt.Println("Saved dummy properties to propertyTypes.json")
 
 	// matches := processProfiles(profiles)
 	//
@@ -539,6 +565,7 @@ func main() {
 	})
 
 	r.GET("/properties", func(c *gin.Context) {
+		fmt.Println(PropertyTypes)
 		c.JSON(200, PropertyTypes)
 	})
 

@@ -34,14 +34,17 @@ export default function ProfileReviewScreen({ profile }: ProfileReviewProps) {
 
             {/* Match Button */}
             <View style={styles.section}>
-                <ThemedText style={styles.sectionTitle}>Match</ThemedText>
+                <ThemedText style={styles.sectionTitle}>Delete</ThemedText>
                 <Button title="Delete profile" onPress={() => { setProfiles(profiles.filter((prof) => prof.contactEmail != profile.contactEmail)); router.push('/') }} />
             </View>
 
+            { /*
             <View style={styles.section}>
                 <ThemedText style={styles.sectionTitle}>Match</ThemedText>
                 <Button title="Find matches" onPress={() => { }} />
             </View>
+            */
+            }
 
             {/* Property Summary */}
             <View style={styles.section}>
