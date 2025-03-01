@@ -44,26 +44,6 @@ type PropertyType struct {
 	ValidRange  []int    `json:"validRange"`
 }
 
-var PropertyTypes = []PropertyType{
-	{"Sex", 10_000, true, []string{"Male", "Female"}, nil},
-	{"Ethnicity", 10, true, []string{"White", "Black", "Asian", "Hispanic", "Native American", "Mixed"}, nil},
-	{"Star sign", 10, false, []string{"Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"}, nil},
-	{"Languages", 10, true, []string{"English", "Spanish", "Mandarin", "Hindi", "French", "Arabic", "Bengali", "Portuguese", "Russian", "Urdu", "German", "Japanese"}, nil},
-	{"Personality", 10, true, []string{"Introverted", "Extroverted"}, nil},
-	{"Drug usage", 10, true, []string{"Tobacco", "Weed", "Mushrooms"}, nil},
-	{"Interests", 10, true, []string{"Travel", "Sports", "Reading", "Hiking", "Gaming", "Camping", "Crypto"}, nil},
-	{"Religion", 10, true, []string{"⚛️ Atheist / Agnostic", "✝️ Christian", "✡️ Jewish"}, nil},
-
-	// Birthday is in unix timestamp seconds.
-	{"Birthday", 100, true, nil, []int{-2204107955, 1172486845}},
-	// Height is in cm
-	{"Height", 100, true, nil, []int{50, 280}},
-	// Weight in kg
-	{"Weight", 100, true, nil, []int{30, 400}},
-
-	{"Extra", 100, true, []string{""}, nil},
-}
-
 type Profile struct {
 	// Basic info:
 	FirstName    string `json:"firstName"`
@@ -86,12 +66,34 @@ type PublicProfile struct {
 	FirstName    string `json:"firstName"`
 	LastInitial  string `json:"lastInitial"`
 	ContactEmail string `json:"contactEmail"`
+
+	Properties []PropertyEntry `json:"properties"`
 }
 
 type Match struct {
 	// Two profiles
-	Profiles []PublicProfile
-	Score    int
+	Profiles []PublicProfile `json:"profiles"`
+	Score    int             `json:"score"`
+}
+
+var PropertyTypes = []PropertyType{
+	{"Sex", 10_000, false, []string{"Male", "Female"}, nil},
+	{"Ethnicity", 10, true, []string{"White", "Black", "Asian", "Hispanic", "Native American", "Mixed"}, nil},
+	{"Star sign", 10, false, []string{"Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"}, nil},
+	{"Languages", 10, true, []string{"English", "Spanish", "Mandarin", "Hindi", "French", "Arabic", "Bengali", "Portuguese", "Russian", "Urdu", "German", "Japanese"}, nil},
+	{"Personality", 10, true, []string{"Introverted", "Extroverted"}, nil},
+	{"Drug usage", 10, true, []string{"Tobacco", "Weed", "Mushrooms"}, nil},
+	{"Interests", 10, true, []string{"Travel", "Sports", "Reading", "Hiking", "Gaming", "Camping", "Crypto"}, nil},
+	{"Religion", 10, true, []string{"⚛️ Atheist / Agnostic", "✝️ Christian", "✡️ Jewish"}, nil},
+
+	// Birthday is in unix timestamp seconds.
+	{"Birthday", 100, true, nil, []int{-2204107955, 1172486845}},
+	// Height is in cm
+	{"Height", 100, true, nil, []int{50, 280}},
+	// Weight in kg
+	{"Weight", 100, true, nil, []int{30, 400}},
+
+	{"Extra", 100, true, []string{""}, nil},
 }
 
 func (p *Profile) Id() [32]byte {
@@ -199,11 +201,13 @@ func processProfiles(profiles []Profile) []Match {
 							p1.FirstName,
 							p1.LastName[:1],
 							p1.ContactEmail,
+							p1.Properties,
 						},
 						{
 							p2.FirstName,
 							p2.LastName[:1],
 							p2.ContactEmail,
+							p2.Properties,
 						},
 					},
 					m.score,
