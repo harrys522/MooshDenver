@@ -5,9 +5,13 @@ import (
 	// "crypto/cipher"
 	// "crypto/rand"
 	// "github.com/edgelesssys/ego/enclave"
+
 	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/tls"
 	"encoding/json"
+	"io"
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -344,8 +348,53 @@ func main() {
 		panic("Failed to sign")
 	}
 
+	// TODO: Complete the implementation of a sealed secret on-disk
+	// {
+	// 	key, _, err := enclave.GetProductSealKey()
+
+	// 	if err != nil {
+	// 		fmt.Println("Error getting product seal key!")
+	// 		fmt.Println(err)
+	// 	} else {
+	// 		// Either decrypt local file with previous key, or create key and file now using.
+	// 		block, err := aes.NewCipher(key)
+
+	// 		if err != nil {
+	// 			panic(err)
+	// 		}
+
+	// 		aesGCM, err := cipher.NewGCM(block)
+	// 		if err != nil {
+	// 			panic(err)
+	// 		}
+	// 		//Decrypt the key if it exists
+	// 		if _, err := os.Stat(".secret"); errors.Is(err, os.ErrNotExist) {
+	// 			nonce := []byte{}
+	// 			rand.Read(nonce[:])
+	// 			aesGCM.Seal(nil, nonce, nil, nil)
+	// 		} else {
+
+	// 		}
+	// 	}
+	// }
+
+	// ROUTES
 	r.GET("/attestation", func(c *gin.Context) {
-		// TODO: Return copy of attestation
+		client := &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		}
+		// Hardcoded local route to PCCS server for identity request
+		res, err := client.Get("https://127.0.0.1:8081/sgx/certification/v4/qe/identity")
+
+		if err != nil {
+			panic(err)
+		}
+
+		body, _ := io.ReadAll(res.Body)
+
+		c.JSON(200, string(body))
 	})
 
 	r.GET("/properties", func(c *gin.Context) {
@@ -377,32 +426,4 @@ func main() {
 	// })
 
 	r.Run(":3000")
-
-	// key, _, err := enclave.GetProductSealKey()
-	//
-	// if err != nil {
-	// 	fmt.Println("Error getting product seal key!")
-	// 	fmt.Println(err)
-	// } else {
-	// 	// Either decrypt local file with previous key, or create key and file now using.
-	//
-	// 	{
-	// 	block, err := aes.NewCipher(key)
-	//
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	//
-	// 	aesGCM, err := cipher.NewGCM(block)
-	//
-	// 	// Decrypt the key or whatever
-	// 	// if err != nil {
-	// 	// 	panic(err)
-	// 	// }
-	// 	//
-	// 	// nonce := [32]byte{}
-	// 	// rand.Read(nonce[:])
-	// 	//
-	// 	// aesGCM.Seal(nil, nonce, nil, nil)
-	// }
 }
