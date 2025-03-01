@@ -51,10 +51,6 @@ export default function ProfileReviewScreen({ profile }: ProfileReviewProps) {
                 </View>
 
                 <View style={styles.section}>
-<<<<<<< Updated upstream
-                    <ThemedText style={styles.sectionTitle}>Delete</ThemedText>
-                    <Button title="Delete profile" onPress={() => { setProfiles(profiles.filter((prof) => prof.contactEmail != profile.contactEmail)); router.push('/') }} />
-=======
                     <ThemedText style={styles.sectionTitle}>Matches</ThemedText>
                     <Button title="Find matches" onPress={() => { }} />
                     {myMatches.length > 0 ? (
@@ -81,7 +77,6 @@ export default function ProfileReviewScreen({ profile }: ProfileReviewProps) {
                     ) : (
                         <ThemedText style={styles.emptyText}>No matches found.</ThemedText>
                     )}
->>>>>>> Stashed changes
                 </View>
 
                 {/* Interests & Preferences Summary */}
