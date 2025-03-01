@@ -234,23 +234,27 @@ export default function ProfileScreen() {
         }} />
       </View>
 
-      <View style={{ marginBottom: 300 }}>
-        <Text> Friends: </Text>
-        <FlatList
-          data={friends}
-          renderItem={({ item: friend }) => (
-            <View style={styles.profileItem}>
-              <View style={{ display: 'flex', flexDirection: 'row' }}>
-                <View style={{ flex: 6 }}>
-                  <WingmanProfile profile={friend} />
+      {
+        friends.length > 0 && (
+          <View style={{ marginBottom: 300 }}>
+            <Text> Friends: </Text>
+            <FlatList
+              data={friends}
+              renderItem={({ item: friend }) => (
+                <View style={styles.profileItem}>
+                  <View style={{ display: 'flex', flexDirection: 'row' }}>
+                    <View style={{ flex: 6 }}>
+                      <WingmanProfile profile={friend} />
+                    </View>
+                    <Button title="X" onPress={() => { removeFriend(friend.id) }} />
+                  </View>
                 </View>
-                <Button title="X" onPress={() => { removeFriend(friend.id) }} />
-              </View>
-            </View>
-          )}
-          keyExtractor={(item, index) => index.toString()}
-        />
-      </View>
+              )}
+              keyExtractor={(item, index) => index.toString()}
+            />
+          </View>
+        )
+      }
 
       {
         (!isProfileScanned || scannedProfile) && (

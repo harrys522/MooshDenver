@@ -190,7 +190,6 @@ export const EverythingProvider: React.FC<{ children: ReactNode }> = ({ children
     if (isLoading || (!actor || !ownProfile)) {
         // TODO: Show fancier icon here.
         return <ActivityIndicator size='large' />
-
     }
 
     return (

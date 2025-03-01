@@ -34,7 +34,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="profiles/index"
           options={{
-            title: 'Profiles',
+            title: 'Matchmaking',
             tabBarIcon: ({ color }) => <IconSymbol size={28} name="heart.fill" color={color} />,
           }}
         />

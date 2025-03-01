@@ -4,12 +4,24 @@ import (
 	// "crypto/aes"
 	// "crypto/cipher"
 	// "crypto/rand"
-	// "github.com/edgelesssys/ego/enclave"
-	"crypto/ed25519"
+	"github.com/edgelesssys/ego/enclave"
+
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/rand"
+	"crypto/rsa"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
+	"errors"
+	"io"
+	"log"
+	"net/http"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"crypto/sha256"
@@ -71,6 +83,12 @@ type Match struct {
 	// Two profiles
 	Profiles []PublicProfile `json:"profiles"`
 	Score    int             `json:"score"`
+}
+
+type ConfidentialProfileSet struct {
+	EncryptedSymKey string `json:"encryptedSymKey"`
+	Iv              string `json:"iv"`
+	Ciphertext      string `json:"ciphertext"`
 }
 
 var PropertyTypes = []PropertyType{
@@ -158,6 +176,7 @@ func compare(pl, pr Profile) int {
 func processProfiles(profiles []Profile) []Match {
 	matches := []Match{}
 
+	fmt.Println("Started matchmaking")
 	for i, p1 := range profiles[:len(profiles)-1] {
 
 		topScores := [5]struct {
@@ -170,6 +189,7 @@ func processProfiles(profiles []Profile) []Match {
 			// TODO: Apply distance filter.
 			// TODO: Apply exclusion list.
 			// TODO: Apply inclusion list.
+			fmt.Println("Finding matches for "+p1.FirstName, ""+p2.FirstName)
 
 			if p1.Id() != p2.Id() {
 				// XXX: Flex, use webassembly to load the module lmao. Would be overkill.
@@ -191,6 +211,7 @@ func processProfiles(profiles []Profile) []Match {
 
 		for _, m := range topScores {
 			if m.found {
+				fmt.Println("Appended one")
 				p2 := m.profile
 				matches = append(matches, Match{
 					[]PublicProfile{
@@ -216,27 +237,126 @@ func processProfiles(profiles []Profile) []Match {
 	return matches
 }
 
-func getKeyPair() (ed25519.PublicKey, ed25519.PrivateKey) {
+// Key size (Recommended: at least 2048 bits)
+const keySize = 2048
 
-	seed, err := os.ReadFile(".secret")
-
-	var sk = ed25519.PrivateKey{}
+// Generates or loads an RSA key pair
+func getKeyPair() (*rsa.PublicKey, *rsa.PrivateKey) {
+	// Check if the key file exists
+	encryptedSeed, err := os.ReadFile(".secret")
 	if err != nil {
-		// No file yet, generate pk and save seed to file.
-		_, genSk, err := ed25519.GenerateKey(rand.Reader)
+		// No key file found, generate a new RSA key pair
+		log.Println("No existing key found. Generating new RSA key pair...")
 
+		privKey, err := rsa.GenerateKey(rand.Reader, keySize)
 		if err != nil {
-			panic(err)
-		} else {
-			sk = genSk
-
-			os.WriteFile(".secret", sk.Seed(), 0o666)
+			log.Fatalf("Failed to generate RSA key: %v", err)
 		}
-	} else {
-		sk = ed25519.NewKeyFromSeed(seed)
+
+		// Encrypt and save the private key
+		saveEncryptedPrivateKey(privKey)
+
+		return &privKey.PublicKey, privKey
 	}
 
-	return sk.Public().(ed25519.PublicKey), sk
+	// Decrypt and load the RSA private key
+	privKey, err := loadEncryptedPrivateKey(encryptedSeed)
+	if err != nil {
+
+		log.Fatalf("Failed to load private key: %v", err)
+	}
+	return &privKey.PublicKey, privKey
+}
+
+// saveEncryptedPrivateKey encrypts the private key using AES-GCM with SGX seal key
+func saveEncryptedPrivateKey(privKey *rsa.PrivateKey) {
+	privKeyBytes := x509.MarshalPKCS1PrivateKey(privKey)
+
+	// Get SGX sealing key
+	sealedKey, _, err := enclave.GetProductSealKey()
+	if err != nil {
+		log.Fatalf("Failed to get SGX sealing key: %v", err)
+	}
+
+	// Encrypt using AES-GCM
+	encryptedKey, err := aesGCMEncrypt(sealedKey, privKeyBytes)
+	if err != nil {
+		log.Fatalf("Failed to encrypt private key: %v", err)
+	}
+
+	// Save to file
+	err = os.WriteFile(".secret", encryptedKey, 0o600)
+	if err != nil {
+		log.Fatalf("Failed to save encrypted private key: %v", err)
+	}
+	log.Println("Encrypted private key saved to .secret")
+}
+
+// loadEncryptedPrivateKey decrypts the private key using AES-GCM with SGX seal key
+func loadEncryptedPrivateKey(encryptedData []byte) (*rsa.PrivateKey, error) {
+	sealedKey, _, err := enclave.GetProductSealKey()
+	if err != nil {
+		return nil, errors.New("failed to get SGX sealing key")
+	}
+
+	decryptedData, err := aesGCMDecrypt(sealedKey, encryptedData)
+	if err != nil {
+		return nil, errors.New("failed to decrypt private key")
+	}
+
+	privKey, err := x509.ParsePKCS1PrivateKey(decryptedData)
+	if err != nil {
+		return nil, errors.New("failed to parse RSA private key")
+	}
+
+	return privKey, nil
+}
+
+// AES-GCM Encryption
+func aesGCMEncrypt(key, plaintext []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key[:16]) // Use first 16 bytes of SGX key
+	if err != nil {
+		return nil, err
+	}
+	aesGCM, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate a random 12-byte nonce
+	nonce := make([]byte, aesGCM.NonceSize())
+	if _, err := rand.Read(nonce); err != nil {
+		return nil, err
+	}
+
+	// Encrypt the data
+	ciphertext := aesGCM.Seal(nil, nonce, plaintext, nil)
+
+	// Return nonce + ciphertext
+	return append(nonce, ciphertext...), nil
+}
+
+// AES-GCM Decryption
+func aesGCMDecrypt(key, encryptedData []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key[:16]) // Use first 16 bytes of SGX key
+	if err != nil {
+		return nil, err
+	}
+	aesGCM, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+
+	nonceSize := aesGCM.NonceSize()
+	if len(encryptedData) < nonceSize {
+		return nil, errors.New("ciphertext too short")
+	}
+
+	// Extract nonce and actual ciphertext
+	nonce, ciphertext := encryptedData[:nonceSize], encryptedData[nonceSize:]
+
+	// Decrypt
+	return aesGCM.Open(nil, nonce, ciphertext, nil)
 }
 
 func main() {
@@ -316,6 +436,9 @@ func main() {
 		})
 	}
 
+	//
+	bytes, _ := json.Marshal(profiles)
+
 	matches := processProfiles(profiles)
 
 	for _, m := range matches {
@@ -332,37 +455,180 @@ func main() {
 	//
 	// return
 
-	pk, sk := getKeyPair()
+	publicKey, secretKey := getKeyPair()
+	log.Println("Public key:", publicKey)
 
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"}, // Replace with frontend URL if needed
+		AllowMethods: []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders: []string{"Content-Type", "Authorization"},
+	}))
 
-	msg := []byte("Hello bro")
-	sig := ed25519.Sign(sk, msg)
-	worked := ed25519.Verify(pk, msg, sig)
+	// TODO: Complete the implementation of a sealed secret on-disk
+	// {
+	// 	key, _, err := enclave.GetProductSealKey()
 
-	if !worked {
-		panic("Failed to sign")
-	}
+	// 	if err != nil {
+	// 		fmt.Println("Error getting product seal key!")
+	// 		fmt.Println(err)
+	// 	} else {
+	// 		// Either decrypt local file with previous key, or create key and file now using.
+	// 		block, err := aes.NewCipher(key)
+
+	// 		if err != nil {
+	// 			panic(err)
+	// 		}
+
+	// 		aesGCM, err := cipher.NewGCM(block)
+	// 		if err != nil {
+	// 			panic(err)
+	// 		}
+	// 		//Decrypt the key if it exists
+	// 		if _, err := os.Stat(".secret"); errors.Is(err, os.ErrNotExist) {
+	// 			nonce := []byte{}
+	// 			rand.Read(nonce[:])
+	// 			aesGCM.Seal(nil, nonce, nil, nil)
+	// 		} else {
+
+	// 		}
+	// 	}
+	// }
+
+	// ROUTES
+	r.GET("/", func(c *gin.Context) {
+		pubKeyBytes, err := x509.MarshalPKIXPublicKey(publicKey) // Encode as X.509
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to encode public key"})
+			return
+		}
+
+		pubPem := pem.EncodeToMemory(&pem.Block{
+			Type:  "PUBLIC KEY",
+			Bytes: pubKeyBytes,
+		})
+
+		c.JSON(http.StatusOK, gin.H{"publicKey": base64.StdEncoding.EncodeToString(pubPem)})
+	})
 
 	r.GET("/attestation", func(c *gin.Context) {
-		// TODO: Return copy of attestation
+		client := &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		}
+		// Hardcoded local route to PCCS server for identity request
+		res, err := client.Get("https://127.0.0.1:8081/sgx/certification/v4/qe/identity")
+
+		if err != nil {
+			panic(err)
+		}
+
+		body, _ := io.ReadAll(res.Body)
+
+		c.JSON(200, string(body))
 	})
 
 	r.GET("/properties", func(c *gin.Context) {
 		c.JSON(200, PropertyTypes)
 	})
 
-	r.GET("/matchmake", func(c *gin.Context) {
-		// Take arrays of profiles as input.
-		// Spits out
-
-		// 1. Decrypt the profile arrays.
+	r.POST("/matchmaking", func(c *gin.Context) {
 		var profiles []Profile
-		c.ShouldBindJSON(&profiles)
+		var encrypted []ConfidentialProfileSet
 
-		// processProfiles()
+		// Parse encrypted input
+		if err := c.ShouldBindJSON(&encrypted); err != nil {
+			log.Println("Invalid JSON (pre-decryption):", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON (pre-decryption)"})
+			return
+		}
 
-		// c.JSON(profiles)
+		for i := range encrypted {
+			// Decode Base64-encoded encrypted symmetric key
+			decodedEncryptedSymmetricKey, err := base64.StdEncoding.DecodeString(encrypted[i].EncryptedSymKey)
+			if err != nil {
+				log.Println("Invalid base64 of encrypted symmetric key:", err)
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid base64 of encrypted symmetric key"})
+				return
+			}
+
+			// Decode Base64-encoded IV
+			decodedInitializationVector, err := base64.StdEncoding.DecodeString(encrypted[i].Iv)
+			if err != nil {
+				log.Println("Invalid base64 of initialization vector:", err)
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid base64 of initialization vector"})
+				return
+			}
+
+			// Validate IV size (AES-CBC requires a 16-byte IV)
+			if len(decodedInitializationVector) != aes.BlockSize {
+				log.Println("Invalid IV size:", len(decodedInitializationVector))
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid initialization vector size"})
+				return
+			}
+
+			// Decrypt symmetric key using RSA
+			symmetricKey, err := secretKey.Decrypt(nil, decodedEncryptedSymmetricKey, nil)
+			if err != nil {
+				log.Println("Failed to decrypt symmetric key:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decrypt symmetric key"})
+				return
+			}
+
+			// Decode Base64-encoded ciphertext
+			decodedCiphertext, err := base64.StdEncoding.DecodeString(encrypted[i].Ciphertext)
+			if err != nil {
+				log.Println("Invalid base64 of ciphertext:", err)
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid base64 of ciphertext"})
+				return
+			}
+
+			// Create AES cipher block
+			block, err := aes.NewCipher(symmetricKey)
+			if err != nil {
+				log.Println("Error creating AES cipher:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create cipher block"})
+				return
+			}
+
+			// CBC decryption requires an IV
+			mode := cipher.NewCBCDecrypter(block, decodedInitializationVector)
+
+			// Decrypt ciphertext
+			decrypted := make([]byte, len(decodedCiphertext))
+			mode.CryptBlocks(decrypted, decodedCiphertext)
+
+			// Remove PKCS#7 padding
+			unpadded, err := pkcs7Unpad(decrypted, aes.BlockSize)
+			if err != nil {
+				log.Println("Padding removal failed:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Padding error"})
+				return
+			}
+
+			decodedUnpadded, err := base64.StdEncoding.DecodeString(string(unpadded))
+			if err != nil {
+				log.Println("Invalid base64 of unpadded:", err)
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid base64 of unpadded"})
+				return
+			}
+			// Parse decrypted JSON data
+			err = json.Unmarshal(decodedUnpadded, &profiles)
+			if err != nil {
+				log.Println("Invalid JSON (post-decryption):", err)
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON (post-decryption)"})
+				return
+			} else {
+				log.Println("Decrypted JSON:", profiles)
+			}
+		}
+
+		// Process profiles
+		matches := processProfiles(profiles)
+		fmt.Println(matches)
+
+		c.JSON(http.StatusOK, matches)
 	})
 
 	// r.GET("/matchmake-debug", func(c *gin.Context) {
@@ -376,33 +642,21 @@ func main() {
 	// 	// c.JSON(profiles)
 	// })
 
-	r.Run()
+	r.Run(":3000")
+}
 
-	// key, _, err := enclave.GetProductSealKey()
-	//
-	// if err != nil {
-	// 	fmt.Println("Error getting product seal key!")
-	// 	fmt.Println(err)
-	// } else {
-	// 	// Either decrypt local file with previous key, or create key and file now using.
-	//
-	// 	{
-	// 	block, err := aes.NewCipher(key)
-	//
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	//
-	// 	aesGCM, err := cipher.NewGCM(block)
-	//
-	// 	// Decrypt the key or whatever
-	// 	// if err != nil {
-	// 	// 	panic(err)
-	// 	// }
-	// 	//
-	// 	// nonce := [32]byte{}
-	// 	// rand.Read(nonce[:])
-	// 	//
-	// 	// aesGCM.Seal(nil, nonce, nil, nil)
-	// }
+func pkcs7Unpad(data []byte, blockSize int) ([]byte, error) {
+	if len(data) == 0 || len(data)%blockSize != 0 {
+		return nil, errors.New("invalid padding size")
+	}
+	padLen := int(data[len(data)-1])
+	if padLen > blockSize || padLen == 0 {
+		return nil, errors.New("invalid padding value")
+	}
+	for _, v := range data[len(data)-padLen:] {
+		if int(v) != padLen {
+			return nil, errors.New("invalid padding pattern")
+		}
+	}
+	return data[:len(data)-padLen], nil
 }

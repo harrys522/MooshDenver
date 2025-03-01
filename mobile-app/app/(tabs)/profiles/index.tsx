@@ -11,6 +11,7 @@ import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { useContext } from 'react';
 import { IcpContext } from '@/components/EverythingProvider';
 import { profiles } from '@/services/test-profiles'
+import { encryptProfiles, samplePublicKey, sendMatchmakingProfiles, getPublicKey } from '@/services/matchmaking';
 
 import { Button } from '@/components/Button';
 
@@ -48,6 +49,15 @@ export default function ProfileScreen() {
             alert('Got id: ' + id)
           } catch (err) {
             alert(err)
+            console.log(err)
+          }
+        }} />
+        <Button title="Send encrypted" onPress={async () => {
+          try {
+            const response = await sendMatchmakingProfiles([encryptProfiles(samplePublicKey, profiles)])
+            alert('Got response: ' + response)
+          } catch (err) {
+            alert("ERROR:" + err)
             console.log(err)
           }
         }} />
