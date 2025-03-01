@@ -10,40 +10,12 @@ import { Ed25519KeyIdentity } from "@dfinity/identity";
 
 import { useContext } from 'react';
 import { IcpContext } from '@/components/IcpProvider';
+import { profiles } from '@/services/test-profiles'
 
 const logo = require('@/assets/images/dating-app-btc-logo.png');
 
 // Main screen is the profiles
 export default function ProfileScreen() {
-  const profiles = [
-    {
-      "name": "tdowd",
-      "age": 21,
-      "sex": "heterosexual",
-      "children": 0,
-      "weight": 75,
-      "height": 175,
-      "drugs": false
-    },
-    {
-      "name": "jdoe",
-      "age": 25,
-      "sex": "homosexual",
-      "children": 2,
-      "weight": 80,
-      "height": 180,
-      "drugs": true
-    },
-    {
-      "name": "jane",
-      "age": 30,
-      "sex": "bisexual",
-      "children": 1,
-      "weight": 65,
-      "height": 160,
-      "drugs": false
-    }
-  ];
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
 
   const icp = useContext(IcpContext)
@@ -63,7 +35,7 @@ export default function ProfileScreen() {
             renderItem={({ item: profile }) => (
               <View style={styles.profileItem}>
                 <TouchableOpacity onPress={() => { setSelectedProfile(profile) }}>
-                  <ThemedText style={styles.profileText}>{profile.name} {profile.age}</ThemedText>
+                  <ThemedText style={styles.profileText}>{profile.firstName} {profile.lastName}</ThemedText>
                 </TouchableOpacity>
               </View>
             )}

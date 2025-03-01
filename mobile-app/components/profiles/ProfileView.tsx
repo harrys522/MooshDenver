@@ -1,5 +1,5 @@
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Profile } from '@/types';
+import { Profile, propertyTypes, getSelectedValues } from '@/types';
 import { ThemedText } from '../ThemedText';
 import BackButton from '../BackButton';
 
@@ -18,13 +18,38 @@ export function ProfileView({ setProfile, profile }: ProfileItemProps) {
                 <ProfileDetail label="Email" value={profile.contactEmail} />
                 <ProfileDetail label="Location" value={profile.geolocation} />
                 <ProfileDetail label="Max Distance" value={`${profile.maxDistance} km`} />
-                <ProfileDetail label="Last Modified" value={profile.lastModified.toDateString()} />
-                {profile.properties.map((property, index) => (
-                    <View key={index}>
-                        <ProfileDetail label={`Property ${index + 1} Type`} value={property.type} />
-                        <ProfileDetail label={`Property ${index + 1}`} value={property.is.join(', ')} />
-                    </View>
-                ))}
+                <ProfileDetail label="Last Modified" value={new Date(profile.lastModified).toDateString()} />
+                
+                {profile.properties.map((property, index) => {
+                    const propertyType = propertyTypes[property.type];
+
+                    if (!propertyType) {
+                        return (
+                            <View key={index}>
+                                <ProfileDetail label={`Unknown Property ${index + 1}`} value={`Type ${property.type}`} />
+                            </View>
+                        );
+                    }
+
+                    const propertyName = propertyType.name;
+                    let displayValue: string;
+
+                    if (propertyType.validFields) {
+                        displayValue = getSelectedValues(property.type, property.is, propertyTypes).join(', ');
+                    } else if (propertyType.validRange) {
+                        displayValue = property.is[0]?.toString() ?? "N/A";
+                    } else if (propertyName === "Birthday") {
+                        displayValue = new Date((property.is[0] ?? 0) * 1000).toDateString();
+                    } else {
+                        displayValue = property.is.join(', ');
+                    }
+
+                    return (
+                        <View key={index}>
+                            <ProfileDetail label={propertyName} value={displayValue} />
+                        </View>
+                    );
+                })}
             </View>
         </ScrollView>
     );
@@ -71,4 +96,3 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
 });
-
