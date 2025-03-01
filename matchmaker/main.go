@@ -173,8 +173,13 @@ func compare(pl, pr Profile) int {
 	return score
 }
 
-func processProfiles(profiles []Profile) []Match {
+func processProfiles(inProfiles [][]Profile) []Match {
 	matches := []Match{}
+
+	var profiles []Profile
+	for i := range inProfiles {
+		profiles = append(profiles, inProfiles[i]...)
+	}
 
 	if len(profiles) < 2 {
 		return []Match{}
@@ -376,13 +381,13 @@ func main() {
 			Geolocation:  "Chicago, USA",
 			MaxDistance:  75.0,
 			Properties: []PropertyEntry{
+				{Type: 9, Is: []int{180}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{175}, CantHave: []int{190}},      // Height: 180 cm
 				{Type: 0, Is: []int{0}, Prefered: []int{1}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},             // Male, prefers female
 				{Type: 1, Is: []int{1}, Prefered: []int{1, 2}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},          // Black
 				{Type: 2, Is: []int{3}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},              // Cancer
 				{Type: 3, Is: []int{0, 5}, Prefered: []int{0, 1, 5}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}},    // English, Arabic
 				{Type: 4, Is: []int{1}, Prefered: []int{}, NotPrefered: []int{0}, MustHave: []int{}, CantHave: []int{}},             // Extroverted
 				{Type: 6, Is: []int{2, 4, 6}, Prefered: []int{2, 4, 6}, NotPrefered: []int{}, MustHave: []int{}, CantHave: []int{}}, // Reading, Gaming, Crypto
-				{Type: 9, Is: []int{180}, Prefered: []int{}, NotPrefered: []int{}, MustHave: []int{175}, CantHave: []int{190}},      // Height: 180 cm
 			},
 			ExclusionList: [][32]byte{},
 			LastModified:  time.Now(),
@@ -538,7 +543,7 @@ func main() {
 	})
 
 	r.POST("/matchmaking", func(c *gin.Context) {
-		var profiles []Profile
+		var profiles [][]Profile
 		var encrypted []ConfidentialProfileSet
 
 		// Parse encrypted input
@@ -618,7 +623,10 @@ func main() {
 				return
 			}
 			// Parse decrypted JSON data
-			err = json.Unmarshal(decodedUnpadded, &profiles)
+			var profilesLocal []Profile
+			err = json.Unmarshal(decodedUnpadded, &profilesLocal)
+			profiles = append(profiles, profilesLocal)
+
 			if err != nil {
 				log.Println("Invalid JSON (post-decryption):", err)
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON (post-decryption)"})

@@ -18,7 +18,7 @@ import dummyProfiles from '@/services/dummyProfiles.json'
 
 import { Button } from '@/components/Button';
 import { BaseView } from '@/components/BaseView';
-import { Match, MatchWith, Profile, PublicProfile } from '@/types';
+import { getProperty, Match, MatchWith, Profile, propertyTypes, PublicProfile } from '@/types';
 
 const logo = require('@/assets/images/Cloud_white.png');
 
@@ -116,7 +116,9 @@ export default function ProfileScreen() {
                         {profile.firstName} {profile.lastName}
                       </ThemedText>
 
-                      <Text> {} y/o </Text>
+                      <Text> {
+                        (new Date()).getFullYear() - (new Date(getProperty(profile, "Birthday", propertyTypes)?.is[0] * 1000) ?? new Date()).getFullYear()
+                      } y/o </Text>
                       <Text> Likes: {} </Text>
                     </View>
 

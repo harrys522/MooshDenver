@@ -3,8 +3,9 @@ import { Profile, propertyTypes, getSelectedValues, Match } from '@/types';
 import { ThemedText } from '../ThemedText';
 import BackButton from '../BackButton';
 import { router } from 'expo-router';
-import React from "react";
+import React, { useContext } from "react";
 import { Button } from "../Button";
+import { ProfilesContext } from '../EverythingProvider';
 
 interface ProfileReviewProps {
     profile: Profile;
@@ -12,6 +13,9 @@ interface ProfileReviewProps {
 }
 
 export default function ProfileReviewScreen({ profile }: ProfileReviewProps) {
+
+    const [profiles, setProfiles] = useContext(ProfilesContext)
+
     return (
         <ScrollView style={styles.container}>
             <ThemedText style={styles.header}>Profile</ThemedText>
@@ -31,8 +35,12 @@ export default function ProfileReviewScreen({ profile }: ProfileReviewProps) {
             {/* Match Button */}
             <View style={styles.section}>
                 <ThemedText style={styles.sectionTitle}>Match</ThemedText>
-                <Button title="Find matches" onPress={() => { }} />
+                <Button title="Delete profile" onPress={() => { setProfiles(profiles.filter((prof) => prof.contactEmail != profile.contactEmail)); router.push('/') }} />
+            </View>
 
+            <View style={styles.section}>
+                <ThemedText style={styles.sectionTitle}>Match</ThemedText>
+                <Button title="Find matches" onPress={() => { }} />
             </View>
 
             {/* Property Summary */}

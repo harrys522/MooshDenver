@@ -85,7 +85,7 @@ export function getProperty(
     propertyTypes: PropertyType[]
 ): PropertyEntry | undefined {
     // Find the index in the propertyTypes array based on the property name.
-    const typeIndex = propertyTypes.findIndex((pt) => pt.name === propertyName);
+    const typeIndex = propertyTypes.findIndex((pt) => pt.name.toLowerCase().includes(propertyName.toLowerCase()));
     if (typeIndex === -1) {
         console.warn(`Property name "${propertyName}" not found in propertyTypes.`);
         return undefined;
