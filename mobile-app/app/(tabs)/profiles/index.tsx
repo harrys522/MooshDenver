@@ -128,7 +128,6 @@ export default function ProfileScreen() {
                         <Text> {
                           (new Date()).getFullYear() - (new Date(getProperty(profile, "Birthday", propertyTypes)?.is[0] * 1000) ?? new Date()).getFullYear()
                         } y/o </Text>
-                        <Text> Likes: {} </Text>
                       </View>
 
                       <Text style={{ fontWeight: '900', fontSize: 20 }}>
