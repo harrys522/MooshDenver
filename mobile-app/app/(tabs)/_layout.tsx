@@ -30,14 +30,14 @@ export default function TabLayout() {
           }),
         }}>
         <Tabs.Screen
-          name="profiles/index"
+          name="profiles"
           options={{
             title: 'Profiles',
             tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
           }}
         />
         <Tabs.Screen
-          name="matches/index"
+          name="matches"
           options={{
             title: 'Matches',
             tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
