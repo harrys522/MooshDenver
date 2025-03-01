@@ -22,7 +22,7 @@ actor {
   private var friends  = HashMap.HashMap<Principal, FriendSet>(10, Principal.equal, Principal.hash);
 
   // For each account stores the current valid friend code and the last friend that was added.
-  // The point of the friend code is that .
+  // The point of the friend code is to for fixers to add one another without direct communication.
   type FriendInvite = Text;
   private var friendInvites = HashMap.HashMap<Principal, (FriendInvite, ?Friend)>(10, Principal.equal, Principal.hash);
 
@@ -50,7 +50,7 @@ actor {
           };
         };
         case null {
-          // If we run out of entropy, get more
+          // If we run out of entropy, get more.
           let newEntropy = await Random.blob();
           randomGenerator := Random.Finite(newEntropy);
         };
@@ -65,7 +65,7 @@ actor {
   };
 
   // ------------------------------------------------------------------
-  // Friend management
+  // Friend management.
   // ------------------------------------------------------------------
 
   public func _addFriend(user: Principal, newFriend: Principal) {
@@ -123,7 +123,7 @@ actor {
             pfp = pfp;
           };
 
-          friendInvites.put(user, (inviteCode, ?friendData));
+          friendInvites.put(friend, (inviteCode, ?friendData));
           return "Invited friend";
         };
       };
@@ -244,25 +244,25 @@ actor {
         // Go through and add the friends' profiles.
         if (profilesMap.get(friendId) == null) {
 
-          // TODO: Consider removing this, not needed with new invite scheme.
-          var valfriendId = false;
-          switch (friends.get(friendId)) {
-            case null {
-              valfriendId := false;
-            };
-            case (?friendSet) {
-              // Is this always false????
-              if (friendSet.get(self) != null) {
-                valfriendId := true;
-              };
-            };
-          };
+          // // Removing this, not needed with new invite scheme. Friends are now always added simultaneously.
+          // var valfriendId = false;
+          // switch (friends.get(friendId)) {
+          //   case null {
+          //     valfriendId := false;
+          //   };
+          //   case (?friendSet) {
+          //     // Is this always false????
+          //     if (friendSet.get(self) != null) {
+          //       valfriendId := true;
+          //     };
+          //   };
+          // };
+          // if (valfriendId) {
+          //   await handleFriends(friendId, depth + 1, maxDepth);
+          // };
 
           // TODO: Maybe add option to how many connections a user trusts with someone.
-
-          if (valfriendId) {
-            await handleFriends(friendId, depth + 1, maxDepth);
-          };
+          await handleFriends(friendId, depth + 1, maxDepth);
         };
       };
     };

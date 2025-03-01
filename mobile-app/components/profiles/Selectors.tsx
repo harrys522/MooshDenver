@@ -17,7 +17,7 @@ const Selector: React.FC<SelectorProps> = ({ label, options = [], selectedValue,
         <Text style={styles.label}>{label}</Text>
         <Picker selectedValue={selectedValue} onValueChange={onValueChange} style={styles.picker}>
             {options.map((option, index) => (
-                <Picker.Item key={index} label={option} value={index} />
+                <Picker.Item key={index} label={option} value={"" + index} />
             ))}
         </Picker>
     </View>
