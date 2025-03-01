@@ -11,6 +11,7 @@ import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { useContext } from 'react';
 import { IcpContext } from '@/components/IcpProvider';
 import { profiles } from '@/services/test-profiles'
+import { encryptProfiles, samplePublicKey } from '@/services/matchmaking';
 
 const logo = require('@/assets/images/dating-app-btc-logo.png');
 
@@ -45,6 +46,15 @@ export default function ProfileScreen() {
             try {
               const id = await icp.getId();
               alert('Got id: ' + id)
+            } catch (err) {
+              alert(err)
+              console.log(err)
+            }
+          }} />
+          <Button title="Send encrypted" onPress={async () => {
+            try {
+              const response = await encryptProfiles(samplePublicKey, profiles);
+              alert('Got response: ' + response)
             } catch (err) {
               alert(err)
               console.log(err)
