@@ -23,7 +23,7 @@ const getPropertyIndex = (propertyName: string, value: string | number | boolean
 // Convert raw profiles to match Profile schema
 export const profiles: Profile[] = [
     {
-        firstName: "T",
+        firstName: "Tomas",
         lastName: "Dowd",
         contactEmail: "tdowd@example.com",
         geolocation: "Unknown",

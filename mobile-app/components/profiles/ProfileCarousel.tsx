@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { View, Button, StyleSheet } from "react-native";
+import BasicProfileScreen from "./BasicProfile";
 import NewProfileScreen from "./AddProfile";
 import PreferenceSelectionScreen from "./Preferences";
+import ProfileReviewScreen from "./ProfileReview";
 import { Profile } from "@/types";
 
 export default function ProfileSetupCarousel() {
@@ -11,42 +13,52 @@ export default function ProfileSetupCarousel() {
         lastName: "",
         contactEmail: "",
         geolocation: "",
-        maxDistance: 0,
+        maxDistance: 50, // Default range value
         properties: [],
         exclusionList: [],
         lastModified: new Date(),
     });
 
     const handleNext = () => {
-        if (step < 2) setStep(step + 1);
+        if (step < 4) setStep(step + 1);
     };
 
     const handleBack = () => {
         if (step > 1) setStep(step - 1);
     };
 
+    const finalizeProfile = () => {
+        console.log(profileData.properties);
+
+    }
+
     return (
         <View style={styles.container}>
             {/* Progress Dots */}
             <View style={styles.progressContainer}>
-                <View style={[styles.dot, step === 1 && styles.activeDot]} />
-                <View style={[styles.dot, step === 2 && styles.activeDot]} />
+                {[1, 2, 3, 4].map((num) => (
+                    <View key={num} style={[styles.dot, step === num && styles.activeDot]} />
+                ))}
             </View>
 
             {/* Step Screens */}
             {step === 1 ? (
+                <BasicProfileScreen profile={profileData} setProfile={setProfileData} />
+            ) : step === 2 ? (
                 <NewProfileScreen profile={profileData} setProfile={setProfileData} />
-            ) : (
+            ) : step === 3 ? (
                 <PreferenceSelectionScreen profile={profileData} setProfile={setProfileData} />
+            ) : (
+                <ProfileReviewScreen profile={profileData} />
             )}
 
             {/* Navigation Buttons */}
             <View style={styles.buttonContainer}>
                 {step > 1 && <Button title="Back" onPress={handleBack} />}
-                {step < 2 ? (
+                {step < 4 ? (
                     <Button title="Next" onPress={handleNext} />
                 ) : (
-                    <Button title="Finish" onPress={() => console.log({ profileData })} />
+                    <Button title="Finish" onPress={finalizeProfile} />
                 )}
             </View>
         </View>
