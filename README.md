@@ -6,6 +6,16 @@ Stretch goal: Extend functionality to make use of ICP, especially the new featur
 
 MooshMatch / Wingman
 
+## Demo instructions
+
+For the mobile app, you can run it using expo-go.
+
+```
+cd mobile-app
+bun i
+bunx expo start
+```
+
 ## Infra setup steps
 
 Chose Vultr Bare Metal E-2286G for an SGX-compatible server to run the confidential matching engine backend.

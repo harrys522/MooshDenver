@@ -38,14 +38,16 @@ export default function PreferenceSelectionScreen({
                         style={styles.preferenceButton}
                         onPress={() => setSelectedType(item)}
                     >
-                        <ThemedText style={styles.buttonText}>{item.toUpperCase()}</ThemedText>
+                        <ThemedText style={styles.buttonText}>
+                            {item === "notPrefered" ? "Not Preferred" : item === "mustHave" ? "Must Have" : item === "cantHave" ? "Can't Have" : "Preferred"}
+                        </ThemedText>
                         <ThemedText style={styles.selectedValues}>
                             {modifiedProperties
                                 .flatMap((prop) =>
                                     Array.isArray(prop[item as keyof PropertyEntry])
                                         ? (prop[item as keyof PropertyEntry] as number[]).map(
-                                              (index) => propertyTypes[prop.type].validFields?.[index] ?? ""
-                                          )
+                                                (index) => propertyTypes[prop.type].validFields?.[index] ?? ""
+                                            )
                                         : []
                                 )
                                 .filter((val) => val !== "")
@@ -114,7 +116,6 @@ const styles = StyleSheet.create({
     buttonText: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#007AFF",
     },
     selectedValues: {
         fontSize: 14,

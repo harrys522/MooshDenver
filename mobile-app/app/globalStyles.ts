@@ -5,7 +5,6 @@ export const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f0f4f8',
         marginTop: 40, // Offset for the status bar, though this should be handled by SafeAreaView!
-        padding: 10,
     },
     header: {
         padding: 20,
