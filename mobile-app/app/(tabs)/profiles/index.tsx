@@ -1,7 +1,7 @@
 import { View, StyleSheet, FlatList, SafeAreaView, Image, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
-import { ProfileView } from '@/components/profiles/Profile';
+import { ProfileView } from '@/components/profiles/ProfileView';
 import { router } from 'expo-router';
 const logo = require('@/assets/images/dating-app-btc-logo.png');
 

@@ -1,7 +1,6 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
 import { Profile } from '@/types';
 import { ThemedText } from '../ThemedText';
-import Icon from 'react-native-vector-icons/Ionicons';
 import BackButton from '../BackButton';
 
 interface ProfileItemProps {
@@ -11,21 +10,27 @@ interface ProfileItemProps {
 
 export function ProfileView({ setProfile, profile }: ProfileItemProps) {
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <BackButton navigate={() => setProfile(null)} />
             <View style={styles.profileContainer}>
-                <ProfileItem label="Age" value={profile.age} />
-                <ProfileItem label="Sex" value={profile.sex} />
-                <ProfileItem label="Children" value={profile.children} />
-                <ProfileItem label="Weight" value={`${profile.weight} kg`} />
-                <ProfileItem label="Height" value={`${profile.height} cm`} />
-                <ProfileItem label="Drugs" value={profile.drugs ? 'Yes' : 'No'} />
+                <ProfileDetail label="First Name" value={profile.firstName} />
+                <ProfileDetail label="Last Name" value={profile.lastName} />
+                <ProfileDetail label="Email" value={profile.contactEmail} />
+                <ProfileDetail label="Location" value={profile.geolocation} />
+                <ProfileDetail label="Max Distance" value={`${profile.maxDistance} km`} />
+                <ProfileDetail label="Last Modified" value={profile.lastModified.toDateString()} />
+                {profile.properties.map((property, index) => (
+                    <View key={index}>
+                        <ProfileDetail label={`Property ${index + 1} Type`} value={property.type} />
+                        <ProfileDetail label={`Property ${index + 1}`} value={property.is.join(', ')} />
+                    </View>
+                ))}
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
-const ProfileItem = ({ label, value }: { label: string; value: string | number }) => (
+const ProfileDetail = ({ label, value }: { label: string; value: string | number }) => (
     <View style={styles.itemRow}>
         <ThemedText style={styles.label}>{label}</ThemedText>
         <ThemedText style={styles.value}>{value}</ThemedText>
@@ -37,10 +42,6 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         backgroundColor: '#f9f9f9',
-    },
-    backButton: {
-        padding: 10,
-        alignSelf: 'flex-start',
     },
     profileContainer: {
         backgroundColor: '#fff',
