@@ -10,7 +10,7 @@ import { _SERVICE } from "@/services/icp-profiles/icp-profiles.did";
 
 import * as SecureStore from 'expo-secure-store';
 import { ProfileWingman } from '@/types';
-import { Profile } from '@/services/types';
+import { Profile, Match } from '@/types';
 import { ActivityIndicator, Platform, Text } from 'react-native';
 import { encryptProfiles, samplePublicKey } from '@/services/matchmaking';
 
@@ -68,7 +68,7 @@ export const EverythingProvider: React.FC<{ children: ReactNode }> = ({ children
 
     const [friends, setFriends] = useState<ProfileWingman[]>([])
     const [profiles, setProfiles] = useState<Profile[]>([])
-    const [matches, setMatches] = useState<Matches[]>([])
+    const [matches, setMatches] = useState<Match[]>([])
 
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
