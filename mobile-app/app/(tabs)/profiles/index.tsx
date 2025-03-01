@@ -1,7 +1,7 @@
 import { View, StyleSheet, FlatList, SafeAreaView, Image, TouchableOpacity, Button } from 'react-native';
 import { useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
-import { ProfileView } from '@/components/profiles/Profile';
+import { ProfileView } from '@/components/profiles/ProfileView';
 import { router } from 'expo-router';
 
 import { createActor } from "@/services/icp-profiles"

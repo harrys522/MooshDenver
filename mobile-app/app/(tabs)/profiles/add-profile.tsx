@@ -1,5 +1,5 @@
-import NewProfileScreen from "@/components/profiles/AddProfile";
+import ProfileSetupCarousel from "@/components/profiles/ProfileCarousel";
 
 export default function AddProfileScreen() {
-    return <NewProfileScreen />;
+    return <ProfileSetupCarousel />;
 }
