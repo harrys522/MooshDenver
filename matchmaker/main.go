@@ -436,9 +436,6 @@ func main() {
 		})
 	}
 
-	//
-	bytes, _ := json.Marshal(profiles)
-
 	matches := processProfiles(profiles)
 
 	for _, m := range matches {
