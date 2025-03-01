@@ -40,7 +40,7 @@ export default function NewProfileScreen({ profile, setProfile }: NewProfileScre
             return (
                 <DateSelector
                     label={item.name}
-                    selectedDate={profileProperty?.is[0] ?? new Date().setFullYear(1990, 0, 1)}
+                    selectedDate={profileProperty?.is[0] ?? Date.now() / 1000 - 18 * 365.25 * 24 * 60 * 60}
                     onDateChange={(value) => handleValueChange(index, value)}
                 />
             );

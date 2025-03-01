@@ -57,4 +57,9 @@ export const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "#ccc",
     },
+    logo: {
+        width: 200,
+        height: 200,
+        marginBottom: 20
+    }
 });

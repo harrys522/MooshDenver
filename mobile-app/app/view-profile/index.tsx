@@ -1,4 +1,4 @@
-import { ProfileView } from "@/components/profiles/ProfileView"
+import ProfileView from "@/components/profiles/ProfileView"
 import { useLocalSearchParams } from "expo-router"
 
 export default function ViewProfiles() {
