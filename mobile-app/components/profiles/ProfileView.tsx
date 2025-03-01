@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, ImageBackground } from 'react-native';
+import { StyleSheet, View, ScrollView, ImageBackground, Pressable, Linking } from 'react-native';
 import { Profile, propertyTypes, getSelectedValues, Match, PublicProfile } from '@/types';
 import { ThemedText } from '../ThemedText';
 import BackButton from '../BackButton';
@@ -51,8 +51,37 @@ export default function ProfileReviewScreen({ profile }: ProfileReviewProps) {
                 </View>
 
                 <View style={styles.section}>
+<<<<<<< Updated upstream
                     <ThemedText style={styles.sectionTitle}>Delete</ThemedText>
                     <Button title="Delete profile" onPress={() => { setProfiles(profiles.filter((prof) => prof.contactEmail != profile.contactEmail)); router.push('/') }} />
+=======
+                    <ThemedText style={styles.sectionTitle}>Matches</ThemedText>
+                    <Button title="Find matches" onPress={() => { }} />
+                    {myMatches.length > 0 ? (
+                        myMatches.map((match, index) => (
+                            <Pressable onPress={() => Linking.openURL(
+                                `mailto:${match.match.contactEmail}?cc=${profile.contactEmail}&subject=${encodeURIComponent("You're a match!")}&body=${encodeURIComponent("You both match through the Wingman matchmaker app thanks to the senders mutual connections.")}`
+                            )}>
+                                <View key={index} style={styles.matchCard}>
+                                    <View style={styles.matchHeader}>
+                                        <ThemedText style={styles.matchName}>
+                                            {match.match.firstName} {match.match.lastInitial}
+                                        </ThemedText>
+                                        <ThemedText style={styles.matchScore}>
+                                            {match.score}%
+                                        </ThemedText>
+                                    </View>
+                                    <ThemedText style={styles.matchDetails}>
+                                        {getMatchReason(profile, match.match)}
+                                    </ThemedText>
+                                </View>
+                            </Pressable>
+                            
+                        ))
+                    ) : (
+                        <ThemedText style={styles.emptyText}>No matches found.</ThemedText>
+                    )}
+>>>>>>> Stashed changes
                 </View>
 
                 {/* Interests & Preferences Summary */}
