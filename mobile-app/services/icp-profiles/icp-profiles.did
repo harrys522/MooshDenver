@@ -1,0 +1,21 @@
+type Profile = text;
+service : {
+  addFriend: (principal) -> () oneway;
+  addFriendDELETELATER: (principal, principal) -> () oneway;
+  addProfile: (principal, Profile) -> () oneway;
+  getAllProfilesBasic: (principal) -> (vec record {
+                                             principal;
+                                             Profile;
+                                           });
+  getAllProfilesWithDepth: (principal, int8) ->
+   (vec record {
+          principal;
+          Profile;
+        });
+  getFriends: (principal) -> (vec principal);
+  getId: () -> (text);
+  getProfile: (principal) -> (opt Profile);
+  greet: (Profile) -> (text) query;
+  removeFriend: (principal) -> () oneway;
+  removeProfile: (principal) -> () oneway;
+}

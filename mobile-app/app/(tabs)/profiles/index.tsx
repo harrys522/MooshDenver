@@ -1,8 +1,16 @@
-import { View, StyleSheet, FlatList, SafeAreaView, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, FlatList, SafeAreaView, Image, TouchableOpacity, Button } from 'react-native';
 import { useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ProfileView } from '@/components/profiles/Profile';
 import { router } from 'expo-router';
+
+import { createActor } from "@/services/icp-profiles"
+import { AnonymousIdentity, SignIdentity } from '@dfinity/agent';
+import { Ed25519KeyIdentity } from "@dfinity/identity";
+
+import { useContext } from 'react';
+import { IcpContext } from '@/components/IcpProvider';
+
 const logo = require('@/assets/images/dating-app-btc-logo.png');
 
 // Main screen is the profiles
@@ -37,27 +45,40 @@ export default function ProfileScreen() {
     }
   ];
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
-  
+
+  const icp = useContext(IcpContext)
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Image source={logo} style={styles.logo} resizeMode="contain" />
         <ThemedText style={styles.title}>Profiles</ThemedText>
       </View>
-      
+
       {selectedProfile ? (<ProfileView setProfile={setSelectedProfile} profile={selectedProfile} />) :
         <View>
           <FlatList
             data={profiles}
             renderItem={({ item: profile }) => (
               <View style={styles.profileItem}>
-                <TouchableOpacity onPress={() => {setSelectedProfile(profile)}}>
+                <TouchableOpacity onPress={() => { setSelectedProfile(profile) }}>
                   <ThemedText style={styles.profileText}>{profile.name} {profile.age}</ThemedText>
                 </TouchableOpacity>
               </View>
             )}
             keyExtractor={(item, index) => index.toString()}
           />
+
+          <Button title="Hello" onPress={async () => {
+            try {
+              const id = await icp.getId();
+              alert('Got id: ' + id)
+            } catch (err) {
+              alert(err)
+              console.log(err)
+            }
+          }} />
+
           <TouchableOpacity style={styles.addButton} onPress={() => router.push('/profiles/add-profile')}>
             <ThemedText style={styles.addButtonText}>Add Profile</ThemedText>
           </TouchableOpacity>
